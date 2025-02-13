@@ -5,6 +5,7 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 ## Get started
 
 1. Install dependencies
+   Note: After install modules -> Delete line 270 "dataDetectorTypes={'none'}" in RichEditor.js in modules before run or it will crash
 
    ```bash
    npm install

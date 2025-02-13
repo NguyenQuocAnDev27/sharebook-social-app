@@ -1,27 +1,14 @@
 import ScreenWarpper from "@/components/ScreenWrapper";
 import { useRouter } from "expo-router";
 import React from "react";
-import { View, Text, StyleSheet, Image, Pressable, AppState } from "react-native";
+import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { hp, wp } from "@/helpers/common";
 import { theme } from "@/constants/theme";
 import Button from "@/components/Button";
-import { supabase } from "@/lib/supabase";
 
 
 const welcome = () => {
-  // Tells Supabase Auth to continuously refresh the session automatically if
-  // the app is in the foreground. When this is added, you will continue to receive
-  // `onAuthStateChange` events with the `TOKEN_REFRESHED` or `SIGNED_OUT` event
-  // if the user's session is terminated. This should only be registered once.
-  AppState.addEventListener('change', (state) => {
-    if (state === 'active') {
-      supabase.auth.startAutoRefresh()
-    } else {
-      supabase.auth.stopAutoRefresh()
-    }
-  })
-  
   const router = useRouter();
 
   return (

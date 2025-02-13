@@ -1,8 +1,6 @@
 import React, { useRef, useState } from "react";
-import { View, Text, TextInput, Pressable, Alert } from "react-native";
-import TestButtonOne from "./welcome";
+import { View, Text, Pressable, Alert } from "react-native";
 import ScreenWarpper from "@/components/ScreenWrapper";
-import Home from "../assets/icons/Home";
 import { theme } from "@/constants/theme";
 import Icon from "@/assets/icons";
 import { StatusBar } from "expo-status-bar";
@@ -36,8 +34,6 @@ const login = () => {
       password,
     });
 
-    console.log("error", error);
-
     // failed login then show error
     if (error) {
       Alert.alert("Sign Up", error.message);
@@ -48,6 +44,7 @@ const login = () => {
     // success login then do something
     console.log(`User ${email} logged in successfully`);
     setLoading(false);
+    router.push("/home");
   };
 
   return (

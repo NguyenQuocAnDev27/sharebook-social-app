@@ -1,7 +1,9 @@
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { AuthProvider, SessionUser, SupaUser, useAuth, User } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { getUserData } from "@/services/userService";
 import { Stack, useRouter } from "expo-router";
 import React, { useEffect } from "react";
+import { AppState } from "react-native";
 
 const _layout = () => {
   return (
@@ -14,13 +16,21 @@ const _layout = () => {
 const MainLayout = () => {
   const authContext = useAuth();
   const router = useRouter();
+  
+  AppState.addEventListener('change', (state) => {
+    if (state === 'active') {
+      supabase.auth.startAutoRefresh()
+    } else {
+      supabase.auth.stopAutoRefresh()
+    }
+  })
 
   if (!authContext) {
     console.error("AuthContext is not found");
     return null;
   }
 
-  const { setAuth } = authContext;
+  const { setAuth, setUserData } = authContext;
 
   useEffect(() => {
     supabase.auth.onAuthStateChange((_event, session) => {
@@ -28,10 +38,9 @@ const MainLayout = () => {
 
       if (session) {
         setAuth({
-          id: session.user.id,
-          name: session.user.user_metadata.full_name,
-          email: session.user.email,
+          authInfo: session?.user,
         });
+        updateUserData(session?.user as SessionUser)
         router.replace("/home");
       } else {
         setAuth(null);
@@ -39,6 +48,16 @@ const MainLayout = () => {
       }
     });
   }, []);
+
+  const updateUserData = async (user: SessionUser) => {
+    let res = await getUserData(user?.id as string);
+    
+    if(res.success) {
+      setUserData({
+        userData: res.data as SupaUser
+      });
+    }
+  }
 
   return (
     <Stack

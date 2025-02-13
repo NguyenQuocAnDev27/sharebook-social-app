@@ -1,15 +1,12 @@
-import ScreenWarpper from "@/components/ScreenWrapper";
-import { useRouter } from "expo-router";
+import Loading from "@/components/Loading";
 import React from "react";
-import { View, Text, Button } from "react-native";
+import { View } from "react-native";
 
 const index = () => {
-  const router = useRouter();
   return (
-    <ScreenWarpper>
-      <Text>Home Screen</Text>
-      <Button title="welcome" onPress={() => router.push("/welcome")} />
-    </ScreenWarpper>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <Loading />
+    </View>
   );
 };
 

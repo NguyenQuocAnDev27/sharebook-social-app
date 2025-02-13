@@ -12,8 +12,6 @@ import Input from "@/components/Input";
 import Button from "@/components/Button";
 import { supabase } from "@/lib/supabase";
 
-// Stop at 1:19:46 youtube video
-
 const signUp = () => {
   const router = useRouter();
   const mailRef = useRef("");
@@ -55,6 +53,7 @@ const signUp = () => {
 
     // success work to-do
     setLoading(false);
+    router.push("/home");
   };
 
   return (

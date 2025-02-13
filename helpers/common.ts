@@ -1,11 +1,34 @@
+import { supabaseUrl } from "@/constants";
 import { Dimensions } from "react-native";
 
-export const {width: deviceWidth, height: deviceHeight} = Dimensions.get('window');
+export const { width: deviceWidth, height: deviceHeight } =
+  Dimensions.get("window");
 
 export const hp = (percentage: number) => {
-  return percentage * deviceHeight / 100;
-}
+  return (percentage * deviceHeight) / 100;
+};
 
 export const wp = (percentage: number) => {
-  return percentage * deviceWidth / 100;
-}
+  return (percentage * deviceWidth) / 100;
+};
+
+export const getImageSource = (uri: string | undefined | null) => {
+  if (typeof uri !== "string") {
+    const defaultUserImage = require("../assets/images/defaultUser.png");
+    return defaultUserImage;
+  }
+  return getSupabaseFileUrl(uri);
+};
+
+export const getSupabaseFileUrl = (filePath: string) => {
+  if (filePath) {
+    return {
+      uri: `${supabaseUrl}/storage/v1/object/public/uploads/${filePath}`,
+    };
+  }
+  return null;
+};
+
+export const getFilePath = (folderName: string, isImage: boolean) => {
+  return `/${folderName}/${new Date().getTime()}${isImage ? ".png" : ".mp4"}`;
+};
