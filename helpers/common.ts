@@ -13,11 +13,11 @@ export const wp = (percentage: number) => {
 };
 
 export const getImageSource = (uri: string | undefined | null) => {
-  if (typeof uri !== "string") {
+  if(uri  === undefined || uri === null) {
     const defaultUserImage = require("../assets/images/defaultUser.png");
     return defaultUserImage;
   }
-  return getSupabaseFileUrl(uri);
+  return getSupabaseFileUrl(uri)?.uri;
 };
 
 export const getSupabaseFileUrl = (filePath: string) => {

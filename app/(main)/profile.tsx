@@ -86,7 +86,10 @@ const UserHeader = ({
               size={hp(12)}
               rounded={theme.radius.xxl * 1.4}
             />
-            <Pressable style={styles.editIcon} onPress={() => router.push('/editProfile')}>
+            <Pressable
+              style={styles.editIcon}
+              onPress={() => router.push("/editProfile")}
+            >
               <Icon name="edit" strokeWidth={2.5} size={20} />
             </Pressable>
           </View>
@@ -113,9 +116,7 @@ const UserHeader = ({
             )}
             {user?.userData?.bio && (
               <View style={styles.info}>
-                <Text style={styles.infoText}>
-                  {user?.userData?.bio}
-                </Text>
+                <Text style={styles.infoText}>{user?.userData?.bio}</Text>
               </View>
             )}
           </View>

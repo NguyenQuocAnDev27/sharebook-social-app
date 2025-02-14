@@ -1,6 +1,7 @@
-import { AuthProvider, SessionUser, SupaUser, useAuth, User } from "@/contexts/AuthContext";
+import { AuthProvider, SupaUser, useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { getUserData } from "@/services/userService";
+import { User as SessionUser } from "@supabase/supabase-js";
 import { Stack, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { AppState } from "react-native";
@@ -37,10 +38,8 @@ const MainLayout = () => {
       console.log(`Session user: ${session?.user?.id}`);
 
       if (session) {
-        setAuth({
-          authInfo: session?.user,
-        });
-        updateUserData(session?.user as SessionUser)
+        setAuth(session?.user);
+        updateUserData(session?.user)
         router.replace("/home");
       } else {
         setAuth(null);
@@ -53,9 +52,7 @@ const MainLayout = () => {
     let res = await getUserData(user?.id as string);
     
     if(res.success) {
-      setUserData({
-        userData: res.data as SupaUser
-      });
+      setUserData(res.data);
     }
   }
 

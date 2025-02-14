@@ -17,6 +17,7 @@ const Avatar: React.FC<AvatarProps> = ({
   rounded = 25,
   style,
 }) => {
+  console.log(`Image selected: ${uri}`)
   return (
     <Image
       source={getImageSource(uri)}

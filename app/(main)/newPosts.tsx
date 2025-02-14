@@ -107,7 +107,7 @@ const newPosts = () => {
       return file.type;
     }
 
-    // check image or video for uploaded on cloud
+    // check image or video uploaded on cloud
     if (file.includes("postImages")) {
       return "image";
     }
