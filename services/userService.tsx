@@ -18,7 +18,7 @@ export const getUserData = async (userId: string): Promise<SupaResponse> => {
 
     // ❌ Error
     if (error) {
-      console.warn(`Error fetching user data for ${userId}`, error);
+      console.warn(`Error fetching user data for ${userId}`, error.message);
       return {
         success: false,
         message: "Error fetching user data",
@@ -59,10 +59,10 @@ export const updateUser = async (user: SupaUser): Promise<SupaResponse> => {
 
     // ❌ Error
     if (error) {
-      console.warn(`Error fetching user data for ${user.id}`, error);
+      console.warn(`Error updating user data for ${user.id}`, error.message);
       return {
         success: false,
-        message: "Error fetching user data",
+        message: "Error updating user data",
         data: null,
       };
     }
@@ -70,15 +70,15 @@ export const updateUser = async (user: SupaUser): Promise<SupaResponse> => {
     // ✅ Success
     return {
       success: true,
-      message: "User data retrieved successfully",
+      message: "User data updating successfully",
       data: user,
     };
   } catch (error) {
     // ❌ Error
-    console.warn(`Error fetching user data for ${user.id}`, error);
+    console.warn(`Error updating user data for ${user.id}`, error);
     return {
       success: false,
-      message: "Error fetching user data",
+      message: "Error updating user data",
       data: null,
     };
   }

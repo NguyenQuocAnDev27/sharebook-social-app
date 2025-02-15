@@ -21,6 +21,7 @@ import Delete from "./Delete";
 import Logout from "./logout";
 import Image from "./Image";
 import Video from "./Video";
+import Download from "./Download"
 
 // Define an object that maps icon names to components
 const icons = {
@@ -45,6 +46,7 @@ const icons = {
   logout: Logout,
   image: Image,
   video: Video,
+  download: Download,
 } as const;
 
 // Define the type for valid icon names
@@ -56,6 +58,7 @@ interface IconProps {
   size?: number;
   strokeWidth?: number;
   color?: string;
+  fill?: string;
 }
 
 // Create the Icon component with TypeScript
@@ -64,6 +67,7 @@ const Icon: React.FC<IconProps> = ({
   size = 24,
   strokeWidth = 1.9,
   color = theme.colors.textLight,
+  fill = 'none',
   ...props
 }) => {
   const IconComponent = icons[name];
@@ -80,6 +84,7 @@ const Icon: React.FC<IconProps> = ({
       width={size}
       strokeWidth={strokeWidth}
       color={color}
+      fill={fill}
       {...props}
     />
   );

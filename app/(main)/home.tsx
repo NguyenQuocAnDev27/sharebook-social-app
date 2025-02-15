@@ -4,11 +4,23 @@ import ScreenWarpper from "@/components/ScreenWrapper";
 import { theme } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { hp, wp } from "@/helpers/common";
-import { supabase } from "@/lib/supabase";
 import { useRouter } from "expo-router";
-import React from "react";
-import { View, Text, StyleSheet, Alert, Pressable } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  Pressable,
+  FlatList,
+} from "react-native";
+import { getPosts, PostViewer } from "@/services/postService";
+import PostCard from "@/components/PostCard";
+import Loading from "@/components/Loading";
+import { supabase } from "@/lib/supabase";
+import { getUserData } from "@/services/userService";
 
+var page = 0;
 const home = () => {
   const authContext = useAuth();
   const router = useRouter();
@@ -17,7 +29,55 @@ const home = () => {
     console.error("AuthContext is not found");
     return null;
   }
-  const { user, setAuth } = authContext;
+
+  const { user } = authContext;
+
+  const [posts, setPosts] = useState<PostViewer[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+
+  const gettingPosts = async () => {
+    if (!hasMore) return;
+
+    page += 1;
+    // 🔄️ get posts
+    let res = await getPosts(page);
+    if (res.success) {
+      console.log(`Home Screen - Getting posts`);
+      if (res?.data?.length > 0) {
+        setPosts((prev) => [...prev, ...res.data]);
+      } else {
+        setHasMore(false);
+      }
+    } else {
+      Alert.alert("Home", "Error while getting posts");
+    }
+  };
+
+  const handlePostEvent = async (payload: any) => {
+    console.log(`Got new post ${JSON.stringify(payload)}`);
+    if (payload?.eventType == "INSERT" && payload?.new?.id) {
+      let newPost: PostViewer = { ...payload.new };
+      let res = await getUserData(newPost.userId);
+      newPost.user = res.success ? res.data : {};
+      setPosts((prevPosts) => [newPost, ...prevPosts]);
+    }
+  };
+
+  useEffect(() => {
+    page = 0;
+    let postsChannel = supabase
+      .channel("posts")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "posts" },
+        handlePostEvent
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(postsChannel);
+    };
+  }, []);
 
   // const onLogout = async () => {
   //   setAuth(null);
@@ -29,11 +89,13 @@ const home = () => {
   //   }
   // };
 
+
   return (
     <ScreenWarpper>
       <View style={styles.container}>
+        {/* header */}
         <View style={styles.header}>
-          <Text style={styles.title}>LinkUp</Text>
+          <Text style={styles.title}>ShareBook</Text>
           <View style={styles.icons}>
             <Pressable onPress={() => router.push("/notifications")}>
               <Icon
@@ -61,6 +123,33 @@ const home = () => {
             </Pressable>
           </View>
         </View>
+
+        {/* posts */}
+        <FlatList
+          data={posts}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listStyle}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <PostCard item={item} currentUser={user} router={router} />
+          )}
+          ListFooterComponent={
+            !hasMore ? (
+              <View style={{marginVertical: 30}}>
+                <Text style={styles.noPost}> No more posts</Text>
+              </View>
+            ) : (
+              <View style={{ marginVertical: posts?.length === 0 ? 200 : 30 }}>
+                <Loading />
+              </View>
+            )
+          }
+          onEndReachedThreshold={0}
+          onEndReached={() => {
+            gettingPosts();
+            console.log("Reaching the end of posts");
+          }}
+        />
       </View>
     </ScreenWarpper>
   );

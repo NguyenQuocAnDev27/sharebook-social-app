@@ -21,6 +21,7 @@ export const getImageSource = (uri: string | undefined | null) => {
 };
 
 export const getSupabaseFileUrl = (filePath: string) => {
+  // console.log(`FilePath: ${filePath}`)
   if (filePath) {
     return {
       uri: `${supabaseUrl}/storage/v1/object/public/uploads/${filePath}`,
@@ -31,4 +32,8 @@ export const getSupabaseFileUrl = (filePath: string) => {
 
 export const getFilePath = (folderName: string, isImage: boolean) => {
   return `/${folderName}/${new Date().getTime()}${isImage ? ".png" : ".mp4"}`;
+};
+
+export const stripHtmlTags = (html: string): string => {
+  return html.replace(/<[^>]*>/gm, '');
 };

@@ -18,12 +18,11 @@ import {
   Image,
   Pressable,
   Alert,
+  KeyboardAvoidingView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Video, ResizeMode } from "expo-av";
 import { createOrUpdatePost, Post } from "@/services/postService";
-
-// Stop at 3:50:00
 
 const newPosts = () => {
   const AuthContext = useAuth();
@@ -125,7 +124,7 @@ const newPosts = () => {
 
   return (
     <ScreenWarpper>
-      <View style={styles.container}>
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
         <Header title="Create Post" />
         <ScrollView
           contentContainerStyle={{ gap: 20 }}
@@ -199,7 +198,7 @@ const newPosts = () => {
           hasShadow={false}
           onPress={onSubmit}
         />
-      </View>
+      </KeyboardAvoidingView>
     </ScreenWarpper>
   );
 };

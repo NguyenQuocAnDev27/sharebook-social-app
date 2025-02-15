@@ -3,6 +3,8 @@ import { SupaResponse } from "./userService";
 import * as FileSystem from "expo-file-system";
 import { decode } from "base64-arraybuffer";
 import { supabase } from "@/lib/supabase";
+import * as MediaLibrary from "expo-media-library";
+import { Alert } from "react-native";
 
 export const uploadFile = async (
   folderName: string,
@@ -27,10 +29,10 @@ export const uploadFile = async (
 
     if (error) {
       // ❌ Error
-      console.warn(`Error while uploading ${fileUri} | ${error}`);
+      console.warn(`Error while uploading ${fileUri} | ${error.message}`);
       return {
         success: false,
-        message: `Error while uploading ${fileUri} | ${error}`,
+        message: `Error while uploading ${fileUri} | ${error.message}`,
         data: null,
       };
     }
@@ -49,5 +51,41 @@ export const uploadFile = async (
       message: `Error while uploading ${fileUri} | ${error}`,
       data: null,
     };
+  }
+};
+
+export const getLocalFilePath = (filePath: string) => {
+  let fileName = filePath.split("/").pop();
+  return `${FileSystem.documentDirectory}${fileName}`;
+};
+
+export const downloadFile = async (url: string) => {
+  try {
+    const { uri } = await FileSystem.downloadAsync(url, getLocalFilePath(url));
+    return uri;
+  } catch (error) {
+    return null;
+  }
+};
+
+export const downloadFileAsync = async (fileUrl: string) => {
+  try {
+    console.log('Url',fileUrl)
+    const { granted } = await MediaLibrary.requestPermissionsAsync();
+    if (!granted) {
+      Alert.alert("Permission Denied", "Please allow storage access.");
+      return;
+    }
+
+    const { uri } = await FileSystem.downloadAsync(fileUrl, getLocalFilePath(fileUrl));
+
+    await MediaLibrary.saveToLibraryAsync(uri);
+
+    Alert.alert("Success", "File downloaded successfully!");
+    return uri;
+  } catch (error) {
+    console.error("Download error:", error);
+    Alert.alert("Error", "Failed to download the file.");
+    return null;
   }
 };
