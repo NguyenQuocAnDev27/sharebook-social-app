@@ -7,8 +7,8 @@ import ScreenWarpper from "@/components/ScreenWrapper";
 import { theme } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { getFilePath, getSupabaseFileUrl, hp, wp } from "@/helpers/common";
-import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -19,10 +19,17 @@ import {
   Pressable,
   Alert,
   KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Video, ResizeMode } from "expo-av";
-import { createOrUpdatePost, Post } from "@/services/postService";
+import {
+  createOrUpdatePost,
+  getPostDetails,
+  Post,
+  PostViewer,
+} from "@/services/postService";
+import { RichEditorProps } from "react-native-pell-rich-editor";
 
 const newPosts = () => {
   const AuthContext = useAuth();
@@ -32,10 +39,26 @@ const newPosts = () => {
   }
   const { user } = AuthContext;
   const bodyRef = useRef("");
-  const editorRef = useRef(null);
+  const editorRef = useRef<RichEditorProps | any>(null);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [file, setFile] = useState<ImagePicker.ImagePickerAsset>();
+  const [file, setFile] = useState<ImagePicker.ImagePickerAsset | string>();
+  const params = useLocalSearchParams();
+  const [post, setPost] = useState<PostViewer | null>(null);
+
+  const gettingPostDetails = async (postId: string) => {
+    const res = await getPostDetails(postId, user?.authInfo?.id || "");
+    if (res.success) {
+      const postDetail = res.data as PostViewer;
+      setPost(postDetail);
+      bodyRef.current = postDetail.body;
+      setFile(postDetail.file);
+      editorRef?.current?.setContentHTML(postDetail.body);
+    } else {
+      Alert.alert("Post", res.message);
+      router.push("/home");
+    }
+  };
 
   const onPickFile = async (isImage: boolean) => {
     const mediaPickImageConfig: ImagePicker.ImagePickerOptions = {
@@ -52,18 +75,20 @@ const newPosts = () => {
     );
 
     if (!result.canceled) {
-      const fileSize = result.assets[0].fileSize ? result.assets[0].fileSize : 0
-      if(fileSize <= 10485760*4) {
+      const fileSize = result.assets[0].fileSize
+        ? result.assets[0].fileSize
+        : 0;
+      if (fileSize <= 10485760 * 4) {
         setFile(result.assets[0]);
       } else {
-        Alert.alert("Post", "File must be less than or equal to 40MB");
+        Alert.alert("Post", "File size must be less than or equal to 40MB");
       }
     }
   };
 
   const onSubmit = async () => {
-    console.log("Content", bodyRef.current);
-    console.log("File", file);
+    // console.log("Content", bodyRef.current);
+    // console.log("File", file);
 
     if (!bodyRef.current) {
       Alert.alert("Post", "Please fill in the content you wannt to post");
@@ -81,19 +106,25 @@ const newPosts = () => {
         file,
       };
 
+      if (post && post.id) data.id = post.id;
+
       setLoading(true);
       // 🔄️
       let res = await createOrUpdatePost(data);
       setLoading(false);
 
-      if(res.success) {
-        console.log(`Uploading Post Result -> ${res.data}`)
+      if (res.success) {
+        console.log(`Uploading Post Result -> ${res.data}`);
         setFile(undefined);
-        bodyRef.current = '';
+        bodyRef.current = "";
         editorRef.current = null;
-        router.back();
+        if (post) {
+          router.push("/home");
+        } else {
+          router.back();
+        }
       } else {
-        Alert.alert('Post', res.message);
+        Alert.alert("Post", res.message);
       }
     } else {
       Alert.alert("Post", "User is not authenticated!");
@@ -105,12 +136,10 @@ const newPosts = () => {
     if (typeof file == "object") {
       return file.type;
     }
-
     // check image or video uploaded on cloud
     if (file.includes("postImages")) {
       return "image";
     }
-
     return "video";
   };
 
@@ -122,10 +151,22 @@ const newPosts = () => {
     return getSupabaseFileUrl(file) ? getSupabaseFileUrl(file)?.uri : undefined;
   };
 
+  useEffect(() => {
+    // *Note: Default params will have __EXPO_ROUTER_key
+    if (Object.keys(params).length > 1) {
+      const postId = params.postId;
+      gettingPostDetails(postId as string);
+    }
+  }, []);
+
   return (
     <ScreenWarpper>
-      <KeyboardAvoidingView style={styles.container} behavior="padding">
-        <Header title="Create Post" />
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={32}
+      >
+        <Header title={post ? "Your Post" : "Create Post"} />
         <ScrollView
           contentContainerStyle={{ gap: 20 }}
           showsVerticalScrollIndicator={false}
@@ -169,17 +210,23 @@ const newPosts = () => {
                   style={{ flex: 1 }}
                 />
               )}
-              <Pressable
-                style={styles.closeIcon}
-                onPress={() => setFile(undefined)}
-              >
-                <Icon name="delete" size={20} color="white" />
-              </Pressable>
+              {post ? (
+                <></>
+              ) : (
+                <Pressable
+                  style={styles.closeIcon}
+                  onPress={() => setFile(undefined)}
+                >
+                  <Icon name="delete" size={20} color="white" />
+                </Pressable>
+              )}
             </View>
           )}
 
           <View style={styles.media}>
-            <Text style={styles.addImageText}>Add to your post</Text>
+            <Text style={styles.addImageText}>
+              {post ? "Update media to your post" : "Add to your post"}
+            </Text>
             <View style={styles.mediaIcons}>
               <TouchableOpacity onPress={() => onPickFile(true)}>
                 <Icon name="image" size={30} color={theme.colors.dark} />
@@ -193,7 +240,7 @@ const newPosts = () => {
 
         <Button
           buttonStyle={{ height: hp(6.2) }}
-          title="Post"
+          title={post ? "Update" : "Post"}
           loading={loading}
           hasShadow={false}
           onPress={onSubmit}

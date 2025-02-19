@@ -1,13 +1,16 @@
 import Icon from "@/assets/icons";
 import Avatar from "@/components/Avatar";
 import Header from "@/components/Header";
+import Loading from "@/components/Loading";
+import PostCard from "@/components/PostCard";
 import ScreenWarpper from "@/components/ScreenWrapper";
 import { theme } from "@/constants/theme";
 import { useAuth, User } from "@/contexts/AuthContext";
 import { hp, wp } from "@/helpers/common";
 import { supabase } from "@/lib/supabase";
+import { getPosts, getYourPosts, PostViewer } from "@/services/postService";
 import { Router, useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -15,8 +18,10 @@ import {
   TouchableOpacity,
   Alert,
   Pressable,
+  FlatList,
 } from "react-native";
 
+var page = 0;
 const Profile = () => {
   const router = useRouter();
 
@@ -26,6 +31,32 @@ const Profile = () => {
     return null;
   }
   const { user, setAuth } = AuthContext;
+  const [posts, setPosts] = useState<PostViewer[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    page = 0;
+    gettingPosts();
+  }, []);
+
+  const gettingPosts = async () => {
+    if (!hasMore) return;
+
+    page += 1;
+    // 🔄️ get posts
+    let res = await getYourPosts(page, user?.authInfo?.id || "");
+
+    if (res.success) {
+      console.log(`Profile Screen - ${res.message}`);
+      if (res?.data?.length > 0) {
+        setPosts((prev) => [...prev, ...res.data]);
+      } else {
+        setHasMore(false);
+      }
+    } else {
+      Alert.alert("Profile", "Error while getting your posts");
+    }
+  };
 
   const onLogout = async () => {
     setAuth(null);
@@ -54,7 +85,39 @@ const Profile = () => {
 
   return (
     <ScreenWarpper>
-      <UserHeader user={user} router={router} handleLogoutBtn={handleLogout} />
+      {/* posts */}
+      <FlatList
+        data={posts}
+        ListHeaderComponent={
+          <UserHeader
+            user={user}
+            router={router}
+            handleLogoutBtn={handleLogout}
+          />
+        }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listStyle}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <PostCard item={item} currentUser={user} router={router} />
+        )}
+        ListFooterComponent={
+          !hasMore ? (
+            <View style={{ marginVertical: 30 }}>
+              <Text style={styles.noPosts}> No more posts</Text>
+            </View>
+          ) : (
+            <View style={{ marginVertical: posts?.length === 0 ? 200 : 30 }}>
+              <Loading />
+            </View>
+          )
+        }
+        onEndReachedThreshold={0}
+        onEndReached={() => {
+          gettingPosts();
+          console.log("Reaching the end of posts");
+        }}
+      />
     </ScreenWarpper>
   );
 };
@@ -121,6 +184,25 @@ const UserHeader = ({
             )}
           </View>
         </View>
+      </View>
+      <View
+        style={{
+          height: hp(10),
+          borderColor: theme.colors.dark,
+          borderTopWidth: 0.6,
+          marginTop: hp(2.6),
+          padding: hp(2.6),
+        }}
+      >
+        <Text
+          style={{
+            alignSelf: "center",
+            fontSize: hp(2.6),
+            fontWeight: theme.fonts.medium,
+          }}
+        >
+          Your latest posts
+        </Text>
       </View>
     </View>
   );

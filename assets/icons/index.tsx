@@ -21,7 +21,12 @@ import Delete from "./Delete";
 import Logout from "./logout";
 import Image from "./Image";
 import Video from "./Video";
-import Download from "./Download"
+import Download from "./Download";
+import LinkBackward from "./LinkBackward";
+import Cancel from "./Cancel";
+import Accept from "./Accept";
+import SideBar from "./SideBar";
+
 
 // Define an object that maps icon names to components
 const icons = {
@@ -47,6 +52,10 @@ const icons = {
   image: Image,
   video: Video,
   download: Download,
+  backward: LinkBackward,
+  cancel: Cancel,
+  accept: Accept,
+  sidebar: SideBar,
 } as const;
 
 // Define the type for valid icon names
@@ -67,7 +76,7 @@ const Icon: React.FC<IconProps> = ({
   size = 24,
   strokeWidth = 1.9,
   color = theme.colors.textLight,
-  fill = 'none',
+  fill = "none",
   ...props
 }) => {
   const IconComponent = icons[name];

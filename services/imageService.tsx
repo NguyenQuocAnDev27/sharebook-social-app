@@ -12,6 +12,14 @@ export const uploadFile = async (
   isImage: boolean = true
 ): Promise<SupaResponse> => {
   try {
+    if(fileUri.includes("profiles")) {
+      return {
+        success: true,
+        message: "File data is already uploaded on cloud",
+        data: fileUri,
+      };
+    }
+
     let fileName = getFilePath(folderName, isImage);
     const fileBase64 = await FileSystem.readAsStringAsync(fileUri, {
       encoding: FileSystem.EncodingType.Base64,

@@ -6,8 +6,9 @@ import { supabase } from "@/lib/supabase";
 const SERVICE_NAME = "Post Serivce";
 
 export interface Post {
+  id?: string;
   userId: string;
-  file: ImagePicker.ImagePickerAsset;
+  file: ImagePicker.ImagePickerAsset | string;
   body: string;
 }
 
@@ -21,11 +22,23 @@ export interface PostViewer {
     id: string;
     userId: string;
   }[];
+  comments: {
+    id: string;
+    postId: string;
+    text: string;
+    user: {
+      id: string;
+      name: string;
+      image: string;
+    };
+    created_at: string;
+  }[];
   body: string;
   created_at: string;
   file: string;
   id: string;
   userId: string;
+  isLikeOwner: boolean;
 }
 
 export const createOrUpdatePost = async (post: Post): Promise<SupaResponse> => {
@@ -33,14 +46,17 @@ export const createOrUpdatePost = async (post: Post): Promise<SupaResponse> => {
   try {
     let postData = { ...post };
     // 🔄️ Uploading file
-    let isImage = postData.file.type == "image";
-    let folderName = isImage ? "postImages" : "postVideos";
-    let fileResult = await uploadFile(folderName, postData.file.uri, isImage);
-    if (fileResult.success) {
-      postData.file = fileResult.data;
-    } else {
-      return fileResult;
+    if (typeof postData.file !== "string") {
+      let isImage = postData.file.type == "image";
+      let folderName = isImage ? "postImages" : "postVideos";
+      let fileResult = await uploadFile(folderName, postData.file.uri, isImage);
+      if (fileResult.success) {
+        postData.file = fileResult.data;
+      } else {
+        return fileResult;
+      }
     }
+
     // 🔄️ Uploading post
     const { data, error } = await supabase
       .from("posts")
@@ -81,19 +97,128 @@ export const createOrUpdatePost = async (post: Post): Promise<SupaResponse> => {
 
 export const numPostsReturn = 5;
 
-export const getPosts = async (page: number): Promise<SupaResponse> => {
+export const getPosts = async (
+  page: number,
+  userId: string
+): Promise<SupaResponse> => {
   const taskName = "getting posts";
+
   try {
     // 🔄️ Getting posts
     const { data, error } = await supabase
       .from("posts")
-      .select(`*, user: users(id, name, image), postLikes(id, userId)`)
+      .select(
+        `*, user: users(id, name, image), postLikes(id, userId), comments (*, user: users(id, name, image))`
+      )
       .order("created_at", { ascending: false })
       .range((page - 1) * numPostsReturn, page * numPostsReturn - 1);
 
     if (error) {
       // ❌ Error
-      console.warn(`${SERVICE_NAME} - Error fetching post | ${error.message}`);
+      console.warn(
+        `${SERVICE_NAME} - Error while ${taskName}| ${error.message}`
+      );
+      return {
+        success: false,
+        message: `Error while ${taskName}`,
+        data: null,
+      };
+    }
+
+    const formattedData: PostViewer[] = data.map((postViewer: PostViewer) => {
+      const isLikeOwner =
+        postViewer.postLikes.some((like) => like?.userId === userId) ?? false;
+      return {
+        ...postViewer,
+        isLikeOwner,
+      };
+    });
+
+    // ✅ Success
+    console.log(`${SERVICE_NAME} - ${taskName} of page ${page}`);
+    return {
+      success: true,
+      message: `${taskName} successfully`,
+      data: formattedData,
+    };
+  } catch (error) {
+    // ❌ Error
+    console.warn(`${SERVICE_NAME} - Error while ${taskName} | ${error}`);
+    return {
+      success: false,
+      message: `Error while ${taskName}`,
+      data: null,
+    };
+  }
+};
+
+export const getYourPosts = async (
+  page: number,
+  userId: string
+): Promise<SupaResponse> => {
+  const taskName = "getting posts";
+
+  try {
+    // 🔄️ Getting posts
+    const { data, error } = await supabase
+      .from("posts")
+      .select(
+        `*, user: users(id, name, image), postLikes(id, userId), comments (*, user: users(id, name, image))`
+      )
+      .eq("userId", userId)
+      .order("created_at", { ascending: false })
+      .range((page - 1) * numPostsReturn, page * numPostsReturn - 1);
+
+    if (error) {
+      // ❌ Error
+      console.warn(
+        `${SERVICE_NAME} - Error while ${taskName}| ${error.message}`
+      );
+      return {
+        success: false,
+        message: `Error while ${taskName}`,
+        data: null,
+      };
+    }
+
+    const formattedData: PostViewer[] = data.map((postViewer: PostViewer) => {
+      const isLikeOwner =
+        postViewer.postLikes.some((like) => like?.userId === userId) ?? false;
+      return {
+        ...postViewer,
+        isLikeOwner,
+      };
+    });
+
+    // ✅ Success
+    console.log(`${SERVICE_NAME} - ${taskName} of page ${page}`);
+    return {
+      success: true,
+      message: `${taskName} successfully`,
+      data: formattedData,
+    };
+  } catch (error) {
+    // ❌ Error
+    console.warn(`${SERVICE_NAME} - Error while ${taskName} | ${error}`);
+    return {
+      success: false,
+      message: `Error while ${taskName}`,
+      data: null,
+    };
+  }
+};
+
+export const removePost = async (postId: string): Promise<SupaResponse> => {
+  const taskName = "removing post";
+  try {
+    // 🔄️ Getting posts
+    const { error } = await supabase.from("posts").delete().eq("id", postId);
+
+    if (error) {
+      // ❌ Error
+      console.warn(
+        `${SERVICE_NAME} - Error while ${taskName} | ${error.message}`
+      );
       return {
         success: false,
         message: `Error while ${taskName}`,
@@ -102,11 +227,11 @@ export const getPosts = async (page: number): Promise<SupaResponse> => {
     }
 
     // ✅ Success
-    console.log(`${SERVICE_NAME} - ${taskName} of page ${page}`);
+    console.log(`${SERVICE_NAME} - ${taskName}`);
     return {
       success: true,
       message: `${taskName} successfully`,
-      data: data as PostViewer[],
+      data: null,
     };
   } catch (error) {
     // ❌ Error
@@ -199,6 +324,164 @@ export const removePostLike = async (
 
     // ✅ Success
     console.log(`${SERVICE_NAME} - ${taskName} of user ${postLike.userId}`);
+    return {
+      success: true,
+      message: `${taskName} successfully`,
+      data: null,
+    };
+  } catch (error) {
+    // ❌ Error
+    console.warn(`${SERVICE_NAME} - Error while ${taskName} | ${error}`);
+    return {
+      success: false,
+      message: `Error while ${taskName}`,
+      data: null,
+    };
+  }
+};
+
+export const getPostDetails = async (
+  postId: string,
+  userId: string
+): Promise<SupaResponse> => {
+  const taskName = "getting postDetails";
+  try {
+    // 🔄️ Getting posts
+    const { data, error } = await supabase
+      .from("posts")
+      .select(
+        `*, user: users (id, name, image), postLikes (*), comments (*, user: users(id, name, image))`
+      )
+      .eq("id", postId)
+      .order("created_at", { ascending: false, foreignTable: "comments" })
+      .single();
+
+    if (error) {
+      // ❌ Error
+      console.warn(
+        `${SERVICE_NAME} - Error while ${taskName} | ${error.message}`
+      );
+      return {
+        success: false,
+        message: `Error while ${taskName}`,
+        data: null,
+      };
+    }
+
+    const checkIsLikeOwner = (postViewer: PostViewer, userId?: string) =>
+      !!postViewer?.postLikes?.some((like) => like?.userId === userId);
+
+    const formattedData: PostViewer | null =
+      typeof data === "object" && data !== null
+        ? {
+            ...(data as PostViewer),
+            isLikeOwner: checkIsLikeOwner(data as PostViewer, userId),
+          }
+        : null;
+
+    // ✅ Success
+    console.log(`${SERVICE_NAME} - ${taskName} of post ${postId}`);
+    return {
+      success: true,
+      message: `${taskName} successfully`,
+      data: formattedData,
+    };
+  } catch (error) {
+    // ❌ Error
+    console.warn(`${SERVICE_NAME} - Error while ${taskName} | ${error}`);
+    return {
+      success: false,
+      message: `Error while ${taskName}`,
+      data: null,
+    };
+  }
+};
+
+export interface CommentPostBody {
+  userId: string;
+  postId: string;
+  text: string;
+}
+
+export const createCommentPost = async (
+  commentBody: CommentPostBody
+): Promise<SupaResponse> => {
+  const taskName = "creating comment";
+  try {
+    // 🔄️ Getting posts
+    const { data, error } = await supabase
+      .from("comments")
+      .insert(commentBody)
+      .select("*, user: users(id, name, image)")
+      .single();
+
+    if (error) {
+      // ❌ Error
+      console.warn(
+        `${SERVICE_NAME} - Error while ${taskName} | ${error.message}`
+      );
+      return {
+        success: false,
+        message: `Error while ${taskName}`,
+        data: null,
+      };
+    }
+
+    // ✅ Success
+    console.log(`${SERVICE_NAME} - ${taskName} of user ${commentBody.userId}`);
+    return {
+      success: true,
+      message: `${taskName} successfully`,
+      data: data as Comment,
+    };
+  } catch (error) {
+    // ❌ Error
+    console.warn(`${SERVICE_NAME} - Error while ${taskName} | ${error}`);
+    return {
+      success: false,
+      message: `Error while ${taskName}`,
+      data: null,
+    };
+  }
+};
+
+export interface Comment {
+  id: string;
+  postId: string;
+  text: string;
+  user: {
+    id: string;
+    name: string;
+    image: string;
+  };
+  created_at: string;
+}
+
+export const removeCommentPost = async (
+  commentId: string
+): Promise<SupaResponse> => {
+  const taskName = "removing comment";
+  try {
+    // 🔄️ Getting posts
+    const { error } = await supabase
+      .from("comments")
+      .delete()
+      .eq("id", commentId);
+
+    if (error) {
+      // ❌ Error
+      console.warn(
+        `${SERVICE_NAME} - Error while ${taskName} | ${error.message}`
+      );
+      return {
+        success: false,
+        message: `Error while ${taskName}`,
+        data: null,
+      };
+    }
+
+    // ✅ Success
+    console.log(`${SERVICE_NAME} - ${taskName} ${commentId}`);
     return {
       success: true,
       message: `${taskName} successfully`,

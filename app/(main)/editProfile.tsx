@@ -9,7 +9,7 @@ import { getImageSource, hp, wp } from "@/helpers/common";
 import { updateUser } from "@/services/userService";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -17,6 +17,9 @@ import {
   ScrollView,
   Pressable,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { uploadFile } from "@/services/imageService";
@@ -42,6 +45,7 @@ const EditProfile = () => {
 
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [isKeyboardShow, setIsKeyboardShow] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -49,6 +53,21 @@ const EditProfile = () => {
       setUser(currentUserData?.userData);
     }
   }, [currentUserData]);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
+      setIsKeyboardShow(true);
+    });
+
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      setIsKeyboardShow(false);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
 
   const onSubmit = async () => {
     let userData = { ...user };
@@ -76,7 +95,7 @@ const EditProfile = () => {
       // ✅ Success work to-do
       setUserData(newUserData.data);
       setUser(newUserData.data);
-      router.back();
+      router.push("/profile");
     } else {
       // ❌ Error work to-do
       Alert.alert("Profile", "Error while updating user");
@@ -105,14 +124,14 @@ const EditProfile = () => {
   return (
     <ScreenWarpper bg="white">
       <View style={styles.container}>
-        <ScrollView style={{ flex: 1 }}>
+        <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
           <Header title="Edit Profile" />
 
           {/* form */}
           <View style={styles.form}>
             <View style={styles.avatarContainer}>
               <Image
-                source={image ? image.uri :getImageSource(user?.image)}
+                source={image ? image.uri : getImageSource(user?.image)}
                 style={styles.avatar}
               />
               <Pressable style={styles.camemraIcon} onPress={onPickImage}>
@@ -161,8 +180,8 @@ const EditProfile = () => {
               }}
               containerStyle={styles.bio}
             />
-
             <Button title="Update" loading={loading} onPress={onSubmit} />
+            <View style={isKeyboardShow ? { height: hp(45) } : {}}></View>
           </View>
         </ScrollView>
       </View>

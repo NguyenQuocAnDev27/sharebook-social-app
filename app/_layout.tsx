@@ -17,14 +17,14 @@ const _layout = () => {
 const MainLayout = () => {
   const authContext = useAuth();
   const router = useRouter();
-  
-  AppState.addEventListener('change', (state) => {
-    if (state === 'active') {
-      supabase.auth.startAutoRefresh()
+
+  AppState.addEventListener("change", (state) => {
+    if (state === "active") {
+      supabase.auth.startAutoRefresh();
     } else {
-      supabase.auth.stopAutoRefresh()
+      supabase.auth.stopAutoRefresh();
     }
-  })
+  });
 
   if (!authContext) {
     console.error("AuthContext is not found");
@@ -39,7 +39,7 @@ const MainLayout = () => {
 
       if (session) {
         setAuth(session?.user);
-        updateUserData(session?.user)
+        updateUserData(session?.user);
         router.replace("/home");
       } else {
         setAuth(null);
@@ -50,18 +50,19 @@ const MainLayout = () => {
 
   const updateUserData = async (user: SessionUser) => {
     let res = await getUserData(user?.id as string);
-    
-    if(res.success) {
+
+    if (res.success) {
       setUserData(res.data);
     }
-  }
+  };
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="login" />
+      <Stack.Screen name="signUp" />
+      <Stack.Screen name="welcome" />
+    </Stack>
   );
 };
 export default _layout;

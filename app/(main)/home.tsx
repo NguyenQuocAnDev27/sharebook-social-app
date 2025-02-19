@@ -40,9 +40,10 @@ const home = () => {
 
     page += 1;
     // 🔄️ get posts
-    let res = await getPosts(page);
+    let res = await getPosts(page, user?.authInfo?.id || "");
+
     if (res.success) {
-      console.log(`Home Screen - Getting posts`);
+      console.log(`Home Screen - ${res.message}`);
       if (res?.data?.length > 0) {
         setPosts((prev) => [...prev, ...res.data]);
       } else {
@@ -89,7 +90,6 @@ const home = () => {
   //   }
   // };
 
-
   return (
     <ScreenWarpper>
       <View style={styles.container}>
@@ -135,7 +135,7 @@ const home = () => {
           )}
           ListFooterComponent={
             !hasMore ? (
-              <View style={{marginVertical: 30}}>
+              <View style={{ marginVertical: 30 }}>
                 <Text style={styles.noPost}> No more posts</Text>
               </View>
             ) : (
