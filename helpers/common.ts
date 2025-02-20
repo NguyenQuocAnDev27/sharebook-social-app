@@ -1,4 +1,5 @@
 import { supabaseUrl } from "@/constants";
+import moment from "moment";
 import { Dimensions } from "react-native";
 
 export const { width: deviceWidth, height: deviceHeight } =
@@ -37,3 +38,7 @@ export const getFilePath = (folderName: string, isImage: boolean) => {
 export const stripHtmlTags = (html: string): string => {
   return html.replace(/<[^>]*>/gm, '');
 };
+
+export const getFormattedDate = (date: string): string => {
+  return moment(date).format("MMM d")
+}

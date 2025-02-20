@@ -17,10 +17,9 @@ import {
   removePostLike,
 } from "@/services/postService";
 import { User } from "@/contexts/AuthContext";
-import { getSupabaseFileUrl, hp, stripHtmlTags, wp } from "@/helpers/common";
+import { getFormattedDate, getSupabaseFileUrl, hp, stripHtmlTags, wp } from "@/helpers/common";
 import { theme } from "@/constants/theme";
 import Avatar from "./Avatar";
-import moment from "moment";
 import Icon from "@/assets/icons";
 import RenderHtml from "react-native-render-html";
 import { SUPABASE_FOLDER_NAME } from "@/constants";
@@ -236,7 +235,7 @@ const PostCard: React.FC<PostCardProps> = ({
           <View style={{ gap: 2 }}>
             <Text style={styles.username}>{item?.user?.name}</Text>
             <Text style={styles.postTime}>
-              {moment(item?.created_at).format("MMM D")}
+              {getFormattedDate(item?.created_at)}
             </Text>
           </View>
         </View>

@@ -19,6 +19,7 @@ import PostCard from "@/components/PostCard";
 import Loading from "@/components/Loading";
 import { supabase } from "@/lib/supabase";
 import { getUserData } from "@/services/userService";
+import { getNotifications } from "@/services/notificationService";
 
 var page = 0;
 const home = () => {
@@ -34,6 +35,7 @@ const home = () => {
 
   const [posts, setPosts] = useState<PostViewer[]>([]);
   const [hasMore, setHasMore] = useState(true);
+  const [nofiCount, setNotiCount] = useState(0);
 
   const gettingPosts = async () => {
     if (!hasMore) return;
@@ -54,6 +56,15 @@ const home = () => {
     }
   };
 
+  const gettingNotifications = async () => {
+    const res = await getNotifications(user?.authInfo?.id || "", false);
+    if (res.success) {
+      setNotiCount(res.data.length);
+    } else {
+      Alert.alert("Notification", res.message);
+    }
+  };
+
   const handlePostEvent = async (payload: any) => {
     console.log(`Got new post ${JSON.stringify(payload)}`);
     if (payload?.eventType == "INSERT" && payload?.new?.id) {
@@ -64,8 +75,26 @@ const home = () => {
     }
   };
 
+  const handleNotifcationEvent = async (payload: any) => {
+    console.log(`Got new notification ${JSON.stringify(payload)}`);
+    if (payload?.eventType == "INSERT" && payload?.new?.id) {
+      setNotiCount((prev) => prev + 1);
+    } else if (payload?.eventType == "UPDATE" && payload?.new?.seen) {
+      setNotiCount((prev) => {
+        if (prev > 0) {
+          return prev - 1;
+        } else {
+          return prev;
+        }
+      });
+    }
+  };
+
   useEffect(() => {
     page = 0;
+
+    gettingNotifications();
+
     let postsChannel = supabase
       .channel("posts")
       .on(
@@ -75,8 +104,23 @@ const home = () => {
       )
       .subscribe();
 
+    let notificationChannel = supabase
+      .channel("notifications")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+          filter: `receiverId=eq.${user?.authInfo?.id}`,
+        },
+        handleNotifcationEvent
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(postsChannel);
+      supabase.removeChannel(notificationChannel);
     };
   }, []);
 
@@ -99,11 +143,16 @@ const home = () => {
           <View style={styles.icons}>
             <Pressable onPress={() => router.push("/notifications")}>
               <Icon
-                name="heart"
+                name="notification"
                 size={hp(3.2)}
                 strokeWidth={1.5}
                 color={theme.colors.text}
               />
+              {nofiCount > 0 && (
+                <View style={styles.pill}>
+                  <Text style={styles.pillText}>{nofiCount}</Text>
+                </View>
+              )}
             </Pressable>
             <Pressable onPress={() => router.push("/newPosts")}>
               <Icon
@@ -201,15 +250,15 @@ const styles = StyleSheet.create({
     right: -10,
     top: -4,
     height: hp(2.2),
-    width: wp(2.2),
+    width: hp(2.2),
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 20,
-    backgroundColor: theme.colors.rose,
+    backgroundColor: theme.colors.roseLight,
   },
   pillText: {
     color: "white",
-    fontSize: hp(2.2),
+    fontSize: hp(1.2),
     fontWeight: theme.fonts.bold,
   },
 });

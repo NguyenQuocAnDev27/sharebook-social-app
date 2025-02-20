@@ -29,10 +29,14 @@ import Loading from "@/components/Loading";
 import Input from "@/components/Input";
 import Icon from "@/assets/icons";
 import CommentItem from "@/components/CommentItem";
+import {
+  createNotification,
+  NotificationBody,
+} from "@/services/notificationService";
 
 const postDetails = () => {
   const router = useRouter();
-  const { postId } = useLocalSearchParams();
+  const { postId, commentId } = useLocalSearchParams();
   const authContext = useAuth();
 
   if (!postId || !authContext) {
@@ -105,7 +109,7 @@ const postDetails = () => {
     };
 
     let res = await createCommentPost(data);
-    
+
     if (res.success) {
       inputRef.current?.clear();
       commentRef.current = "";
@@ -124,7 +128,16 @@ const postDetails = () => {
           comments: [res.data, ...prevPost.comments],
         };
       });
-      
+
+      if (post.userId !== user?.authInfo?.id) {
+        let prepareData: NotificationBody = {
+          senderId: user?.authInfo?.id || "",
+          receiverId: post?.user.id || "",
+          title: "commented on your post",
+          data: JSON.stringify({ postId: post?.id, commentId: res.data.id }),
+        };
+        await createNotification(prepareData);
+      }
     } else {
       Alert.alert("Comment", res.message);
     }
@@ -201,6 +214,13 @@ const postDetails = () => {
                     user?.authInfo?.id == post.id
                   }
                   removingComment={onRemovingComment}
+                  hightLight={
+                    commentId
+                      ? comment.id === commentId
+                        ? true
+                        : false
+                      : false
+                  }
                 />
               ))}
 

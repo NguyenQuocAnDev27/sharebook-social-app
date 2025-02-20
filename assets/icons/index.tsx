@@ -26,7 +26,8 @@ import LinkBackward from "./LinkBackward";
 import Cancel from "./Cancel";
 import Accept from "./Accept";
 import SideBar from "./SideBar";
-
+import Notification from "./Notification";
+import EyeOff from "./EyeOff";
 
 // Define an object that maps icon names to components
 const icons = {
@@ -56,6 +57,9 @@ const icons = {
   cancel: Cancel,
   accept: Accept,
   sidebar: SideBar,
+  notification: Notification,
+  eyeOff: EyeOff,
+
 } as const;
 
 // Define the type for valid icon names

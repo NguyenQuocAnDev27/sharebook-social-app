@@ -1,9 +1,8 @@
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { theme } from "@/constants/theme";
-import { hp } from "@/helpers/common";
+import { getFormattedDate, hp } from "@/helpers/common";
 import Avatar from "./Avatar";
-import moment from "moment";
 import Icon from "@/assets/icons";
 import { Comment } from "@/services/postService";
 
@@ -11,12 +10,14 @@ export interface CommentItemProps {
   comment: Comment;
   isCommentOwner?: boolean;
   removingComment: (item: any) => void;
+  hightLight?: boolean;
 }
 
 const CommentItem: React.FC<CommentItemProps> = ({
   comment,
   isCommentOwner = false,
   removingComment,
+  hightLight = false,
 }) => {
   const onRemoveComment = (item: any) => {
     Alert.alert("Warning", "This comment will be deleted forever!", [
@@ -36,7 +37,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   return (
     <View style={styles.container}>
       <Avatar uri={comment.user.image} />
-      <View style={styles.content}>
+      <View style={[styles.content, hightLight ? styles.highlight : null]}>
         <View
           style={{
             flexDirection: "row",
@@ -48,7 +49,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
             <Text style={styles.text}>{comment.user.name}</Text>
             <Text>•</Text>
             <Text style={[styles.text, { color: theme.colors.textLight }]}>
-              {moment(comment.created_at).format("MMM d")}
+              {getFormattedDate(comment.created_at)}
             </Text>
           </View>
           {isCommentOwner && (
