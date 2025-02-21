@@ -1,13 +1,13 @@
 import { SupaUser } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 
-export interface SupaResponse<T = any> {
+export interface APIResponse<T = any> {
   success: boolean;
   message: string;
   data: T | null;
 }
 
-export const getUserData = async (userId: string): Promise<SupaResponse> => {
+export const getUserData = async (userId: string): Promise<APIResponse> => {
   try {
     // 🔄️ getting data
     const { data, error } = await supabase
@@ -43,7 +43,7 @@ export const getUserData = async (userId: string): Promise<SupaResponse> => {
   }
 };
 
-export const updateUser = async (user: SupaUser): Promise<SupaResponse> => {
+export const updateUser = async (user: SupaUser): Promise<APIResponse> => {
   try {
     // 🔄️ updating data
     const { error } = await supabase

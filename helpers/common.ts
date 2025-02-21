@@ -1,5 +1,6 @@
 import { supabaseUrl } from "@/constants";
 import moment from "moment";
+import "moment/locale/vi";
 import { Dimensions } from "react-native";
 
 export const { width: deviceWidth, height: deviceHeight } =
@@ -40,5 +41,29 @@ export const stripHtmlTags = (html: string): string => {
 };
 
 export const getFormattedDate = (date: string): string => {
-  return moment(date).format("MMM d")
+  moment.locale("vi");
+  return moment(date).format("D MMMM")
 }
+
+export const maskGmail = (email: string): string => {
+  if (!email.includes("@gmail.com")) return "";
+
+  const username = email.replace("@gmail.com", "");
+  if (username.length <= 8) return email;
+
+  const firstPart = username.slice(0, 4);
+  const lastPart = username.slice(-4);
+  const middleMask = "*".repeat(username.length - 8);
+
+  return `${firstPart}${middleMask}${lastPart}@gmail.com`;
+};
+
+export const maskPhoneNumber = (phoneNumber: string): string => {
+  if (phoneNumber.length < 6) return "";
+
+  const firstPart = phoneNumber.slice(0, 2);
+  const lastPart = phoneNumber.slice(-4);
+  const middleMask = "*".repeat(phoneNumber.length - 6);
+
+  return `${firstPart}${middleMask}${lastPart}`;
+};

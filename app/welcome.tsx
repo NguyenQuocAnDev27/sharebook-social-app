@@ -2,7 +2,6 @@ import ScreenWarpper from "@/components/ScreenWrapper";
 import { useRouter } from "expo-router";
 import React from "react";
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
-import { StatusBar } from "expo-status-bar";
 import { hp, wp } from "@/helpers/common";
 import { theme } from "@/constants/theme";
 import Button from "@/components/Button";
@@ -12,8 +11,7 @@ const welcome = () => {
   const router = useRouter();
 
   return (
-    <ScreenWarpper>
-      <StatusBar style="dark" />
+    <ScreenWarpper autoDismissKeyboard={false}>
       <View style={styles.container}>
         <Image
           style={styles.welcomeImage}

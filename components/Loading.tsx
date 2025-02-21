@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 
 interface LoadingProps {
-  size?: 'large' | 'small';
+  size?: 'large' | 'small' | number;
   color?: string;
 }
 

@@ -92,7 +92,7 @@ const postDetails = () => {
       <View
         style={[styles.center, { justifyContent: "center", marginTop: 100 }]}
       >
-        <Text style={styles.notFound}>Post not found!</Text>
+        <Text style={styles.notFound}>Không tìm được bài viết!</Text>
       </View>
     );
   }
@@ -180,7 +180,7 @@ const postDetails = () => {
           <View style={styles.inputContainer}>
             <Input
               inputRef={inputRef}
-              placeholder="Type comment..."
+              placeholder="Viết bình luận..."
               onChangeText={(value) => (commentRef.current = value)}
               placeholderTextColor={theme.colors.textLight}
               containerStyle={{
@@ -226,7 +226,7 @@ const postDetails = () => {
 
             {post?.comments.length === 0 && (
               <Text style={{ color: theme.colors.text, marginLeft: 5 }}>
-                Write the first comment!
+                Hãy viết những dòng bình luận đầu tiên!
               </Text>
             )}
           </View>

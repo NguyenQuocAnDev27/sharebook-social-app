@@ -1,5 +1,5 @@
 import { getFilePath } from "@/helpers/common";
-import { SupaResponse } from "./userService";
+import { APIResponse } from "./userService";
 import * as FileSystem from "expo-file-system";
 import { decode } from "base64-arraybuffer";
 import { supabase } from "@/lib/supabase";
@@ -10,7 +10,7 @@ export const uploadFile = async (
   folderName: string,
   fileUri: string,
   isImage: boolean = true
-): Promise<SupaResponse> => {
+): Promise<APIResponse> => {
   try {
     if(fileUri.includes("profiles")) {
       return {

@@ -9,7 +9,7 @@ import { getImageSource, hp, wp } from "@/helpers/common";
 import { updateUser } from "@/services/userService";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -17,12 +17,13 @@ import {
   ScrollView,
   Pressable,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
   Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { uploadFile } from "@/services/imageService";
+import { getProvinces, Province } from "@/services/provinceService";
+import { Picker } from "@react-native-picker/picker";
 
 const EditProfile = () => {
   const AuthContext = useAuth();
@@ -37,8 +38,8 @@ const EditProfile = () => {
     name: "",
     email: "",
     image: null,
-    bio: "",
-    address: "",
+    bio: null,
+    address: null,
     phoneNumber: "",
     createdAt: "",
   });
@@ -46,15 +47,38 @@ const EditProfile = () => {
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
   const [isKeyboardShow, setIsKeyboardShow] = useState(false);
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
+  const [isOpenListProvince, setIsOpenListProvince] = useState<boolean>(false);
+  const [isOpenListDistrict, setIsOpenListDistrict] = useState<boolean>(false);
   const router = useRouter();
+
+  const gettingCity = async () => {
+    let res = await getProvinces();
+    if (res.success) {
+      setProvinces(res.data || []);
+    } else {
+      Alert.alert("Profile", res.message);
+    }
+  };
 
   useEffect(() => {
     if (currentUserData && currentUserData?.userData) {
       setUser(currentUserData?.userData);
+      if (currentUserData?.userData?.address) {
+        const [province, district] = currentUserData.userData.address
+          .toString()
+          .split(" - ");
+        setSelectedProvince(province);
+        setSelectedDistrict(district);
+      }
     }
   }, [currentUserData]);
 
   useEffect(() => {
+    gettingCity();
+
     const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
       setIsKeyboardShow(true);
     });
@@ -62,7 +86,6 @@ const EditProfile = () => {
     const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
       setIsKeyboardShow(false);
     });
-
     return () => {
       showSubscription.remove();
       hideSubscription.remove();
@@ -72,8 +95,13 @@ const EditProfile = () => {
   const onSubmit = async () => {
     let userData = { ...user };
     let { name, phoneNumber, address, image, bio } = userData;
+    console.log(`${selectedDistrict} - ${selectedProvince}`);
+    if (selectedDistrict === null || selectedProvince === null) {
+      Alert.alert("Profile", "Vui lòng chọn địa chỉ của bạn!");
+      return;
+    }
     if (!name || !phoneNumber || !address || !bio || !image) {
-      Alert.alert("Profile", "Please fill all the fields!");
+      Alert.alert("Profile", "Vui lòng điền các thông tin!");
       return;
     }
 
@@ -122,10 +150,10 @@ const EditProfile = () => {
   };
 
   return (
-    <ScreenWarpper bg="white">
+    <ScreenWarpper bg="white" autoDismissKeyboard={isKeyboardShow}>
       <View style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
-          <Header title="Edit Profile" />
+          <Header title="Sửa thông tin" />
 
           {/* form */}
           <View style={styles.form}>
@@ -145,11 +173,11 @@ const EditProfile = () => {
                 color: theme.colors.text,
               }}
             >
-              Please full your profile details
+              Hãy điền đầy đủ thông tin
             </Text>
             <Input
               icon={<Icon name="user" />}
-              placeholder="Enter your name"
+              placeholder="Nhập họ tên"
               value={user?.name}
               onChangeText={(value) => {
                 setUser((prev) => ({ ...prev, name: value }));
@@ -157,31 +185,121 @@ const EditProfile = () => {
             />
             <Input
               icon={<Icon name="call" />}
-              placeholder="Enter your phone number"
+              placeholder="Nhập số điện thoại"
               value={user?.phoneNumber}
               onChangeText={(value) => {
                 setUser((prev) => ({ ...prev, phoneNumber: value }));
               }}
             />
-            <Input
+
+            <View>
+              <Text style={styles.label}>Chọn tỉnh/thành phố:</Text>
+              <TouchableWithoutFeedback
+                onPress={() => setIsOpenListProvince(true)}
+              >
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={selectedProvince}
+                    onValueChange={(value) => {
+                      setSelectedProvince(value);
+                      setSelectedDistrict(null);
+                      setIsOpenListProvince(false);
+                    }}
+                    style={styles.picker}
+                  >
+                    <Picker.Item
+                      style={styles.pickerItem}
+                      label={`Chọn tỉnh/thành phố`}
+                      value={null}
+                    />
+                    {provinces.map((province) => (
+                      <Picker.Item
+                        style={styles.pickerItem}
+                        key={province.code}
+                        label={province.name}
+                        value={province.name}
+                        color={
+                          isOpenListProvince
+                            ? selectedProvince === province.name
+                              ? theme.colors.primary
+                              : theme.colors.text
+                            : theme.colors.text
+                        }
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              </TouchableWithoutFeedback>
+
+              {selectedProvince && (
+                <>
+                  <Text style={styles.label}>Chọn quận/huyện/thành phố:</Text>
+                  <TouchableWithoutFeedback
+                    onPress={() => setIsOpenListDistrict(true)}
+                  >
+                    <View style={styles.pickerContainer}>
+                      <Picker
+                        selectedValue={selectedDistrict}
+                        onValueChange={(value) => {
+                          setSelectedDistrict(value);
+                          setUser((prev) => ({
+                            ...prev,
+                            address: `${selectedProvince} - ${value}`,
+                          }));
+                          setIsOpenListDistrict(false);
+                        }}
+                        style={styles.picker}
+                      >
+                        <Picker.Item
+                          style={styles.pickerItem}
+                          label={`Chọn quận/huyện/thành phố`}
+                          value={null}
+                        />
+                        {provinces
+                          .find(
+                            (province) => province.name === selectedProvince
+                          )
+                          ?.districts.map((district) => (
+                            <Picker.Item
+                              style={styles.pickerItem}
+                              key={district.code}
+                              label={district.name}
+                              value={district.name}
+                              color={
+                                isOpenListDistrict
+                                  ? selectedDistrict === district.name
+                                    ? theme.colors.primary
+                                    : theme.colors.text
+                                  : theme.colors.text
+                              }
+                            />
+                          ))}
+                      </Picker>
+                    </View>
+                  </TouchableWithoutFeedback>
+                </>
+              )}
+            </View>
+            {/* <Input
               icon={<Icon name="location" />}
               placeholder="Enter your address"
-              value={user?.address}
-              onChangeText={(value) => {
-                setUser((prev) => ({ ...prev, address: value }));
-              }}
-            />
+              value={`${selectedProvince || ""} - ${selectedDistrict || ""}`}
+              editable={false}
+              containerStyle={{backgroundColor: theme.colors.lightGray2}}
+            /> */}
             <Input
-              placeholder="Enter your bio"
-              value={user?.bio}
+              placeholder="Nhập tiểu sử"
+              value={user?.bio || undefined}
               multiline={true}
               onChangeText={(value) => {
                 setUser((prev) => ({ ...prev, bio: value }));
               }}
               containerStyle={styles.bio}
             />
-            <Button title="Update" loading={loading} onPress={onSubmit} />
-            <View style={isKeyboardShow ? { height: hp(45) } : {}}></View>
+
+            {/* submit */}
+            <Button title="Cập nhật" loading={loading} onPress={onSubmit} />
+            <View style={isKeyboardShow ? { height: hp(25) } : {}}></View>
           </View>
         </ScrollView>
       </View>
@@ -242,4 +360,18 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     paddingVertical: 15,
   },
+  label: {
+    fontSize: hp(1.5),
+    color: theme.colors.text,
+    fontWeight: theme.fonts.medium,
+    marginVertical: 10,
+  },
+  pickerContainer: {
+    borderWidth: 0.4,
+    borderColor: theme.colors.text,
+    borderRadius: theme.radius.xxl,
+    borderCurve: "continuous",
+  },
+  picker: { backgroundColor: "transparent" },
+  pickerItem: {},
 });

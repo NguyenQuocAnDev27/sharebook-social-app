@@ -28,6 +28,7 @@ import Accept from "./Accept";
 import SideBar from "./SideBar";
 import Notification from "./Notification";
 import EyeOff from "./EyeOff";
+import TokenCircle from "./TokenCircle";
 
 // Define an object that maps icon names to components
 const icons = {
@@ -59,6 +60,7 @@ const icons = {
   sidebar: SideBar,
   notification: Notification,
   eyeOff: EyeOff,
+  tokenCircle: TokenCircle,
 
 } as const;
 

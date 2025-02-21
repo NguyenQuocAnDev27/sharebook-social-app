@@ -1,9 +1,15 @@
 import React, { useRef, useState } from "react";
-import { View, Text, Pressable, Alert } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
 import ScreenWarpper from "@/components/ScreenWrapper";
 import { theme } from "@/constants/theme";
 import Icon from "@/assets/icons";
-import { StatusBar } from "expo-status-bar";
 import { StyleSheet } from "react-native";
 import BackButton from "@/components/BackButton";
 import { useRouter } from "expo-router";
@@ -49,7 +55,6 @@ const login = () => {
 
   return (
     <ScreenWarpper bg="white">
-      <StatusBar style="dark" />
       <View style={styles.container}>
         <BackButton
           onPress={() => {
@@ -73,12 +78,15 @@ const login = () => {
             icon={<Icon name="mail" size={26} strokeWidth={1.6} />}
             placeholder="Enter your email"
             onChangeText={(text) => (mailRef.current = text)}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
           {/* password field */}
           <Input
             icon={<Icon name="lock" size={26} strokeWidth={1.6} />}
             placeholder="Enter your password"
             onChangeText={(text) => (passwordRef.current = text)}
+            secureTextEntry={true}
           />
           {/* forgot password */}
           <Text style={styles.forgotPassword}>Forgot Password?</Text>

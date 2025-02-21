@@ -3,7 +3,6 @@ import { View, Text, Pressable, Alert, AppState } from "react-native";
 import ScreenWarpper from "@/components/ScreenWrapper";
 import { theme } from "@/constants/theme";
 import Icon from "@/assets/icons";
-import { StatusBar } from "expo-status-bar";
 import { StyleSheet } from "react-native";
 import BackButton from "@/components/BackButton";
 import { useRouter } from "expo-router";
@@ -58,7 +57,6 @@ const signUp = () => {
 
   return (
     <ScreenWarpper bg="white">
-      <StatusBar style="dark" />
       <View style={styles.container}>
         <BackButton
           onPress={() => {
@@ -88,6 +86,8 @@ const signUp = () => {
             icon={<Icon name="mail" size={26} strokeWidth={1.6} />}
             placeholder="Enter your email"
             onChangeText={(text) => (mailRef.current = text)}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
           {/* password field */}
           <Input

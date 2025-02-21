@@ -17,7 +17,13 @@ import {
   removePostLike,
 } from "@/services/postService";
 import { User } from "@/contexts/AuthContext";
-import { getFormattedDate, getSupabaseFileUrl, hp, stripHtmlTags, wp } from "@/helpers/common";
+import {
+  getFormattedDate,
+  getSupabaseFileUrl,
+  hp,
+  stripHtmlTags,
+  wp,
+} from "@/helpers/common";
 import { theme } from "@/constants/theme";
 import Avatar from "./Avatar";
 import Icon from "@/assets/icons";
@@ -60,7 +66,7 @@ const PostCard: React.FC<PostCardProps> = ({
   );
 
   const isPostOwner = item.userId === currentUser?.userData?.id;
-  const [isEditPost, setIsEditPost] = useState<boolean>(false);
+  const [openMoreFunctions, setOpenMoreFunctions] = useState<boolean>(false);
 
   const [likes, setLikes] = useState<any[]>([]);
   const [comments, setComments] = useState<any[]>([]);
@@ -100,7 +106,12 @@ const PostCard: React.FC<PostCardProps> = ({
     setComments(item?.comments || []);
   }, []);
 
-  const openPostDetails = () => {};
+  const openPostDetails = () => {
+    router.push({
+      pathname: "/postDetails",
+      params: { postId: item.id },
+    });
+  };
 
   // console.log(`Post - File ${item?.file})`);
   // if(item?.file && item?.file?.includes(SUPABASE_FOLDER_NAME.VIDEO) ) {
@@ -111,12 +122,15 @@ const PostCard: React.FC<PostCardProps> = ({
   // }
 
   const onLike = async () => {
-    if (currentUser?.userData?.id == null || currentUser?.userData?.id === undefined) {
+    if (
+      currentUser?.userData?.id == null ||
+      currentUser?.userData?.id === undefined
+    ) {
       Alert.alert(`User is not authenticated`);
       return;
     }
 
-    if(item?.id === null || item?.id === undefined) {
+    if (item?.id === null || item?.id === undefined) {
       Alert.alert(`Post is not valid`);
       return;
     }
@@ -130,7 +144,7 @@ const PostCard: React.FC<PostCardProps> = ({
 
     let res = await createPostLike(data);
 
-    if(res.success) {
+    if (res.success) {
       setLikes((prev) => [
         ...prev,
         { id: res?.data?.id, userId: res?.data?.userId },
@@ -211,14 +225,14 @@ const PostCard: React.FC<PostCardProps> = ({
   };
 
   const onDeletePost = async () => {
-    Alert.alert("Post", "This post will be deleted forever!", [
+    Alert.alert("Bài viết", "Bài viết này sẽ bị xóa vĩnh viễn!", [
       {
-        text: "Cancel",
+        text: "Hủy",
         onPress: () => {},
         style: "cancel",
       },
       {
-        text: "Delete",
+        text: "Xóa",
         onPress: onDeletingPost,
         style: "destructive",
       },
@@ -248,20 +262,18 @@ const PostCard: React.FC<PostCardProps> = ({
         {disableBackIcon ? (
           <TouchableOpacity onPress={openPostDetails}>
             <Icon
-              name="threeDotsHorizontal"
+              name="tokenCircle"
               size={hp(3.4)}
-              strokeWidth={3}
-              color={theme.colors.text}
+              strokeWidth={2}
+              color={theme.colors.primary}
             />
           </TouchableOpacity>
         ) : (
-          <>
-            {isEditPost ? (
-              <View style={styles.actions}>
+          <View style={styles.actions}>
+            {openMoreFunctions ? (
+              <>
                 {loadingDeletingPost ? (
-                  <View>
-                    <Loading size="small" />
-                  </View>
+                  <Loading />
                 ) : (
                   <>
                     <TouchableOpacity onPress={onDeletePost}>
@@ -291,44 +303,40 @@ const PostCard: React.FC<PostCardProps> = ({
                 )}
                 <TouchableOpacity
                   onPress={() => {
-                    setIsEditPost(false);
+                    setOpenMoreFunctions(false);
                   }}
                 >
                   <Icon
-                    name="backward"
+                    name="cancel"
                     size={hp(3.4)}
                     strokeWidth={2}
                     color={theme.colors.text}
                   />
                 </TouchableOpacity>
-              </View>
+              </>
             ) : (
-              <View style={styles.actions}>
-                {isPostOwner && (
-                  <TouchableOpacity
-                    onPress={() => {
-                      setIsEditPost(true);
-                    }}
-                  >
-                    <Icon
-                      name="threeDotsHorizontal"
-                      size={hp(3.4)}
-                      strokeWidth={2}
-                      color={theme.colors.text}
-                    />
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity onPress={() => router.push("/home")}>
-                  <Icon
-                    name="backward"
-                    size={hp(3.4)}
-                    strokeWidth={2}
-                    color={theme.colors.text}
-                  />
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setOpenMoreFunctions(true);
+                }}
+              >
+                <Icon
+                  name="threeDotsHorizontal"
+                  size={hp(3.4)}
+                  strokeWidth={2}
+                  color={theme.colors.text}
+                />
+              </TouchableOpacity>
             )}
-          </>
+            <TouchableOpacity onPress={() => router.push("/home")}>
+              <Icon
+                name="backward"
+                size={hp(3.4)}
+                strokeWidth={2}
+                color={theme.colors.text}
+              />
+            </TouchableOpacity>
+          </View>
         )}
       </View>
 

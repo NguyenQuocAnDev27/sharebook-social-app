@@ -162,7 +162,7 @@ const newPosts = () => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={32}
       >
-        <Header title={post ? "Your Post" : "Create Post"} />
+        <Header title={post ? "Bài viết của bạn" : "Bài viết mới"} />
         <ScrollView
           contentContainerStyle={{ gap: 20 }}
           showsVerticalScrollIndicator={false}
@@ -178,7 +178,7 @@ const newPosts = () => {
               <Text style={styles.username}>
                 {user && user?.userData?.name}
               </Text>
-              <Text style={styles.publicText}>Public</Text>
+              <Text style={styles.publicText}>Công khai</Text>
             </View>
           </View>
 
@@ -221,7 +221,7 @@ const newPosts = () => {
 
           <View style={styles.media}>
             <Text style={styles.addImageText}>
-              {post ? "Update media to your post" : "Add to your post"}
+              {post ? "Cập nhật hình ảnh/video của bài viết" : "Thêm hình ảnh/video"}
             </Text>
             <View style={styles.mediaIcons}>
               <TouchableOpacity onPress={() => onPickFile(true)}>
@@ -236,7 +236,7 @@ const newPosts = () => {
 
         <Button
           buttonStyle={{ height: hp(6.2) }}
-          title={post ? "Update" : "Post"}
+          title={post ? "Cập nhật" : "Đăng"}
           loading={loading}
           hasShadow={false}
           onPress={onSubmit}

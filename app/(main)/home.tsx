@@ -138,8 +138,9 @@ const home = () => {
   //   }
   // };
 
+
   return (
-    <ScreenWarpper>
+    <ScreenWarpper autoDismissKeyboard={false}>
       <View style={styles.container}>
         {/* header */}
         <View style={styles.header}>
@@ -189,7 +190,7 @@ const home = () => {
           ListFooterComponent={
             !hasMore ? (
               <View style={{ marginVertical: 30 }}>
-                <Text style={styles.noPost}> No more posts</Text>
+                <Text style={styles.noPost}>Bạn đã xem hết các bài viết</Text>
               </View>
             ) : (
               <View style={{ marginVertical: posts?.length === 0 ? 200 : 30 }}>

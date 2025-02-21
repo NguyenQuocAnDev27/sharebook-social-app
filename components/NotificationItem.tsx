@@ -25,23 +25,28 @@ import Animated, {
 interface NotificationItemProps {
   notification: Notification;
   router: Router;
+  onDeleteNotification: (id: string) => void;
 }
 
 const NotificationItem: React.FC<NotificationItemProps> = ({
   notification,
   router,
+  onDeleteNotification
 }) => {
   const { postId, commentId } = JSON.parse(notification.data);
   const [openMenu, setOpenMenu] = React.useState(false);
+  const [isSeen, setIsSeen] = React.useState(notification.seen);
 
   const onOpenPostDetail = async () => {
     router.push({ pathname: "/postDetails", params: { postId, commentId } });
     await updateStatusNotification(notification);
   };
 
-  const onSeenNotification = async () => {};
-
-  const onDeleteNotification = async () => {};
+  const onSeenNotification = async () => {
+    await updateStatusNotification(notification);
+    setOpenMenu(false);
+    setIsSeen(true);
+  };
 
   const closeMenu = () => {
     flexValue.value = withTiming(0, { duration: 200 });
@@ -66,9 +71,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       disabled={openMenu}
       style={[
         styles.container,
-        notification.seen
-          ? { backgroundColor: theme.colors.gray, borderWidth: 0 }
-          : null,
+        isSeen ? { backgroundColor: theme.colors.gray, borderWidth: 0 } : null,
       ]}
     >
       <Avatar uri={notification.sender.image} rounded={18} />
@@ -91,7 +94,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             { color: theme.colors.textDark, fontWeight: theme.fonts.bold },
           ]}
         >
-          {notification.title}
+          {notification.title === 'commented on your post' ? 'đã bình luận về bài viết của bạn' : 'unknown action'}
         </Text>
       </View>
       <View style={styles.moreIconContainer}>
@@ -110,10 +113,12 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
               animatedStyle,
             ]}
           >
-            <Pressable onPress={onSeenNotification}>
-              <Icon name="eyeOff" color={theme.colors.dark} strokeWidth={2} />
-            </Pressable>
-            <Pressable onPress={onDeleteNotification}>
+            {!isSeen && (
+              <Pressable onPress={onSeenNotification}>
+                <Icon name="eyeOff" color={theme.colors.dark} strokeWidth={2} />
+              </Pressable>
+            )}
+            <Pressable onPress={() => onDeleteNotification(notification.id)}>
               <Icon
                 name="delete"
                 color={theme.colors.roseLight}

@@ -25,7 +25,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         actions={[
           actions.setStrikethrough,
           actions.removeFormat,
-          actions.insertImage,
           actions.setBold,
           actions.setItalic,
           actions.insertOrderedList,
@@ -61,7 +60,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           color: theme.colors.text,
           placeholderColor: "gray",
         }}
-        placeholder={"Write your thoughts here..."}
+        placeholder={"Hãy viết những suy nghĩ của bạn ở đây..."}
         onChange={onChange}
       />
     </View>

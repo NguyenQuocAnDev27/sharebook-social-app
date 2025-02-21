@@ -6,7 +6,7 @@ import PostCard from "@/components/PostCard";
 import ScreenWarpper from "@/components/ScreenWrapper";
 import { theme } from "@/constants/theme";
 import { useAuth, User } from "@/contexts/AuthContext";
-import { hp, wp } from "@/helpers/common";
+import { hp, maskGmail, maskPhoneNumber, wp } from "@/helpers/common";
 import { supabase } from "@/lib/supabase";
 import { getPosts, getYourPosts, PostViewer } from "@/services/postService";
 import { Router, useRouter } from "expo-router";
@@ -33,6 +33,7 @@ const Profile = () => {
   const { user, setAuth } = AuthContext;
   const [posts, setPosts] = useState<PostViewer[]>([]);
   const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     page = 0;
@@ -59,8 +60,10 @@ const Profile = () => {
   };
 
   const onLogout = async () => {
+    setIsLoading(true);
     setAuth(null);
     const { error } = await supabase.auth.signOut();
+    setIsLoading(false);
 
     if (error) {
       console.warn("Error logging out", error);
@@ -69,22 +72,45 @@ const Profile = () => {
   };
 
   const handleLogout = () => {
-    Alert.alert("Profile", "Are you sure want to logout?", [
+    Alert.alert("Trang cá nhân", "Bạn đang đăng xuất đúng chứ>", [
       {
-        text: "Cancel",
+        text: "Không phải",
         onPress: () => {},
         style: "cancel",
       },
       {
-        text: "Yes",
+        text: "Đúng vậy",
         onPress: () => onLogout(),
         style: "destructive",
       },
     ]);
   };
 
+  if (isLoading) {
+    return (
+      <ScreenWarpper autoDismissKeyboard={false}>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
+          <Text
+            style={{
+              color: theme.colors.primary,
+              fontSize: hp(4),
+              textAlign: "center",
+              fontWeight: theme.fonts.extraBold,
+              marginBottom: hp(10),
+            }}
+          >
+            ShareBook
+          </Text>
+          <Loading size={60} />
+        </View>
+      </ScreenWarpper>
+    );
+  }
+
   return (
-    <ScreenWarpper>
+    <ScreenWarpper autoDismissKeyboard={false}>
       {/* posts */}
       <FlatList
         data={posts}
@@ -104,7 +130,11 @@ const Profile = () => {
         ListFooterComponent={
           !hasMore ? (
             <View style={{ marginVertical: 30 }}>
-              <Text style={styles.noPosts}> No more posts</Text>
+              <Text style={styles.noPosts}>
+                {posts.length > 0
+                  ? "Bạn đã xem hết các bài viết"
+                  : "Hãy tạo bài viết đầu tiên nào!"}
+              </Text>
             </View>
           ) : (
             <View style={{ marginVertical: posts?.length === 0 ? 200 : 30 }}>
@@ -115,7 +145,6 @@ const Profile = () => {
         onEndReachedThreshold={0}
         onEndReached={() => {
           gettingPosts();
-          console.log("Reaching the end of posts");
         }}
       />
     </ScreenWarpper>
@@ -132,11 +161,9 @@ const UserHeader = ({
   handleLogoutBtn: () => void;
 }) => {
   return (
-    <View
-      style={{ flex: 1, backgroundColor: "white", paddingHorizontal: wp(4) }}
-    >
+    <View style={{ flex: 1, backgroundColor: "white" }}>
       <View style={styles.headerContainer}>
-        <Header title="Profile" marginBottom={30} />
+        <Header title="Trang cá nhân" marginBottom={30} />
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogoutBtn}>
           <Icon name="logout" color={theme.colors.rose} strokeWidth={2} />
         </TouchableOpacity>
@@ -159,7 +186,7 @@ const UserHeader = ({
 
           <View style={{ alignItems: "center", gap: 4 }}>
             <Text style={styles.userName}>
-              {user?.userData?.name || "Your name here"}
+              {user?.userData?.name || "Chưa cập nhật tên"}
             </Text>
             <Text>{user?.userData?.address || ""}</Text>
           </View>
@@ -167,13 +194,15 @@ const UserHeader = ({
           <View style={{ gap: 10 }}>
             <View style={styles.info}>
               <Icon name="mail" size={20} color={theme.colors.textLight} />
-              <Text style={styles.infoText}>{user?.authInfo?.email}</Text>
+              <Text style={styles.infoText}>
+                {maskGmail(user?.authInfo?.email || "")}
+              </Text>
             </View>
             {user?.userData?.phoneNumber && (
               <View style={styles.info}>
                 <Icon name="call" size={20} color={theme.colors.textLight} />
                 <Text style={styles.infoText}>
-                  {user?.userData?.phoneNumber}
+                  {maskPhoneNumber(user?.userData?.phoneNumber)}
                 </Text>
               </View>
             )}
@@ -201,7 +230,7 @@ const UserHeader = ({
             fontWeight: theme.fonts.medium,
           }}
         >
-          Your latest posts
+          Các bài viết của bạn
         </Text>
       </View>
     </View>
@@ -213,9 +242,10 @@ export default Profile;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingHorizontal: wp(4),
   },
   headerContainer: {
-    marginHorizontal: wp(4),
+    // marginHorizontal: wp(4),
     marginBottom: 20,
   },
   avatarContainer: {

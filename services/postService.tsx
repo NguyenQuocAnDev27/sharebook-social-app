@@ -1,5 +1,5 @@
 import * as ImagePicker from "expo-image-picker";
-import { SupaResponse } from "./userService";
+import { APIResponse } from "./userService";
 import { uploadFile } from "./imageService";
 import { supabase } from "@/lib/supabase";
 
@@ -41,7 +41,7 @@ export interface PostViewer {
   isLikeOwner: boolean;
 }
 
-export const createOrUpdatePost = async (post: Post): Promise<SupaResponse> => {
+export const createOrUpdatePost = async (post: Post): Promise<APIResponse> => {
   const taskName = "creating or updating post";
   try {
     let postData = { ...post };
@@ -100,7 +100,7 @@ export const numPostsReturn = 5;
 export const getPosts = async (
   page: number,
   userId: string
-): Promise<SupaResponse> => {
+): Promise<APIResponse> => {
   const taskName = "getting posts";
 
   try {
@@ -155,7 +155,7 @@ export const getPosts = async (
 export const getYourPosts = async (
   page: number,
   userId: string
-): Promise<SupaResponse> => {
+): Promise<APIResponse> => {
   const taskName = "getting posts";
 
   try {
@@ -208,7 +208,7 @@ export const getYourPosts = async (
   }
 };
 
-export const removePost = async (postId: string): Promise<SupaResponse> => {
+export const removePost = async (postId: string): Promise<APIResponse> => {
   const taskName = "removing post";
   try {
     // 🔄️ Getting posts
@@ -258,7 +258,7 @@ export interface PostLike {
 
 export const createPostLike = async (
   postLike: PostLikeBody
-): Promise<SupaResponse> => {
+): Promise<APIResponse> => {
   const taskName = "creating postLike";
   try {
     // 🔄️ Getting posts
@@ -300,7 +300,7 @@ export const createPostLike = async (
 
 export const removePostLike = async (
   postLike: PostLikeBody
-): Promise<SupaResponse> => {
+): Promise<APIResponse> => {
   const taskName = "removing postLike";
   try {
     // 🔄️ Getting posts
@@ -343,7 +343,7 @@ export const removePostLike = async (
 export const getPostDetails = async (
   postId: string,
   userId: string
-): Promise<SupaResponse> => {
+): Promise<APIResponse> => {
   const taskName = "getting postDetails";
   try {
     // 🔄️ Getting posts
@@ -405,7 +405,7 @@ export interface CommentPostBody {
 
 export const createCommentPost = async (
   commentBody: CommentPostBody
-): Promise<SupaResponse> => {
+): Promise<APIResponse> => {
   const taskName = "creating comment";
   try {
     // 🔄️ Getting posts
@@ -459,7 +459,7 @@ export interface Comment {
 
 export const removeCommentPost = async (
   commentId: string
-): Promise<SupaResponse> => {
+): Promise<APIResponse> => {
   const taskName = "removing comment";
   try {
     // 🔄️ Getting posts

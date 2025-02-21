@@ -5,7 +5,11 @@ import ScreenWarpper from "@/components/ScreenWrapper";
 import { theme } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { hp, wp } from "@/helpers/common";
-import { getNotifications, Notification } from "@/services/notificationService";
+import {
+  getNotifications,
+  Notification,
+  removeNotification,
+} from "@/services/notificationService";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { View, Text, Alert, ScrollView, StyleSheet } from "react-native";
@@ -15,7 +19,7 @@ const notifications = () => {
   const authConext = useAuth();
 
   if (!authConext) {
-    Alert.alert("Notification", "You are not authenticated");
+    Alert.alert("Thông báo", "You are not authenticated");
     router.push("/login");
     return null;
   }
@@ -30,9 +34,18 @@ const notifications = () => {
     if (res.success) {
       setNotifications(res.data);
     } else {
-      Alert.alert("Notification", res.message);
+      Alert.alert("Thông báo", res.message);
     }
     setLoading(false);
+  };
+
+  const removingNotification = async (notificationId: string) => {
+    let res = await removeNotification(notificationId);
+    if (res.success) {
+      setNotifications((prev) => prev.filter((_) => _.id !== notificationId));
+    } else {
+      Alert.alert("Thông báo", res.message);
+    }
   };
 
   useEffect(() => {
@@ -40,9 +53,9 @@ const notifications = () => {
   }, []);
 
   return (
-    <ScreenWarpper bg={theme.colors.lightGray}>
+    <ScreenWarpper bg={theme.colors.lightGray} autoDismissKeyboard={false}>
       <View style={styles.container}>
-        <Header title="Notifications" />
+        <Header title="Thông báo" />
         {loading ? (
           <View style={styles.listStyle}>
             <Loading />
@@ -54,7 +67,7 @@ const notifications = () => {
           >
             {notifications.length === 0 ? (
               <View style={null}>
-                <Text style={styles.noData}>No notification</Text>
+                <Text style={styles.noData}>Bạn chưa nhận thông báo nào cả</Text>
               </View>
             ) : (
               notifications.map((notification) => {
@@ -63,6 +76,7 @@ const notifications = () => {
                     key={notification.id}
                     notification={notification}
                     router={router}
+                    onDeleteNotification={(id) => removingNotification(id)}
                   />
                 );
               })

@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { SupaResponse } from "./userService";
+import { APIResponse } from "./userService";
 
 const SERVICE_NAME = "Notification Service";
 
@@ -36,7 +36,7 @@ export interface NotificationBody {
 
 export const createNotification = async (
   body: NotificationBody
-): Promise<SupaResponse> => {
+): Promise<APIResponse> => {
   const taskName = "creating notification";
   try {
     // 🔄️ Creating notification
@@ -78,7 +78,7 @@ export const createNotification = async (
 
 export const updateStatusNotification = async (
   notification: Notification
-): Promise<SupaResponse> => {
+): Promise<APIResponse> => {
   const taskName = "updating status notification";
   try {
     const newData: NotificationSchema = {
@@ -87,8 +87,8 @@ export const updateStatusNotification = async (
       receiverId: notification.receiverId,
       title: notification.title,
       data: notification.data,
-      seen: true
-    }
+      seen: true,
+    };
 
     // 🔄️ Creating notification
     const { data, error } = await supabase
@@ -130,7 +130,7 @@ export const updateStatusNotification = async (
 export const getNotifications = async (
   userId: string,
   getAll: boolean = true
-): Promise<SupaResponse> => {
+): Promise<APIResponse> => {
   const taskName = "getting notifications";
   try {
     // 🔄️ Getting notifications
@@ -165,6 +165,47 @@ export const getNotifications = async (
       success: true,
       message: `${taskName} successfully`,
       data: data as Notification[],
+    };
+  } catch (error) {
+    // ❌ Error
+    console.warn(`${SERVICE_NAME} - Error while ${taskName} | ${error}`);
+    return {
+      success: false,
+      message: `Error while ${taskName}`,
+      data: null,
+    };
+  }
+};
+
+export const removeNotification = async (
+  notificationId: string
+): Promise<APIResponse> => {
+  const taskName = "removing notification";
+  try {
+    // 🔄️ Getting notifications
+    const { error } = await supabase
+      .from("notifications")
+      .delete()
+      .eq("id", notificationId);
+
+    if (error) {
+      // ❌ Error
+      console.warn(
+        `${SERVICE_NAME} - Error while ${taskName}| ${error.message}`
+      );
+      return {
+        success: false,
+        message: `Error while ${taskName}`,
+        data: null,
+      };
+    }
+
+    // ✅ Success
+    console.log(`${SERVICE_NAME} - ${taskName} sucessfully`);
+    return {
+      success: true,
+      message: `${taskName} successfully`,
+      data: notificationId,
     };
   } catch (error) {
     // ❌ Error

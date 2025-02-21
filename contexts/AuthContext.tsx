@@ -8,8 +8,8 @@ export interface SupaUser {
   name?: string;
   email?: string;
   image?: string | null;
-  bio?: string;
-  address?: string;
+  bio?: string | null;
+  address?: string | null;
   phoneNumber?: string;
   createdAt?: string;
 }
