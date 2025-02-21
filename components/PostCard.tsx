@@ -122,10 +122,7 @@ const PostCard: React.FC<PostCardProps> = ({
   // }
 
   const onLike = async () => {
-    if (
-      currentUser?.id == null ||
-      currentUser?.id === undefined
-    ) {
+    if (currentUser?.id == null || currentUser?.id === undefined) {
       Alert.alert(`User is not authenticated`);
       return;
     }
@@ -225,7 +222,7 @@ const PostCard: React.FC<PostCardProps> = ({
   };
 
   const openProfile = async () => {
-    router.push({pathname: '/profile', params: {userId: item.userId}})
+    router.push({ pathname: "/profile", params: { userId: item.userId } });
   };
 
   const onDeletePost = async () => {
@@ -250,7 +247,7 @@ const PostCard: React.FC<PostCardProps> = ({
       <View style={styles.header}>
         {/* user info */}
         <View style={styles.userInfo}>
-          <TouchableOpacity onPress={openProfile} disabled={isPostOwner}>
+          <TouchableOpacity onPress={openProfile} disabled={!isPostOwner}>
             <Avatar
               size={hp(4.5)}
               uri={item?.user?.image}
@@ -258,7 +255,7 @@ const PostCard: React.FC<PostCardProps> = ({
             />
           </TouchableOpacity>
           <View style={{ gap: 2 }}>
-            <TouchableOpacity onPress={openProfile} disabled={isPostOwner}>
+            <TouchableOpacity onPress={openProfile} disabled={!isPostOwner}>
               <Text style={styles.username}>{item?.user?.name}</Text>
             </TouchableOpacity>
             <Text style={styles.postTime}>
@@ -323,18 +320,22 @@ const PostCard: React.FC<PostCardProps> = ({
                 </TouchableOpacity>
               </>
             ) : (
-              <TouchableOpacity
-                onPress={() => {
-                  setOpenMoreFunctions(true);
-                }}
-              >
-                <Icon
-                  name="threeDotsHorizontal"
-                  size={hp(3.4)}
-                  strokeWidth={2}
-                  color={theme.colors.text}
-                />
-              </TouchableOpacity>
+              <>
+                {isPostOwner && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setOpenMoreFunctions(true);
+                    }}
+                  >
+                    <Icon
+                      name="threeDotsHorizontal"
+                      size={hp(3.4)}
+                      strokeWidth={2}
+                      color={theme.colors.text}
+                    />
+                  </TouchableOpacity>
+                )}
+              </>
             )}
             <TouchableOpacity onPress={() => router.push("/home")}>
               <Icon

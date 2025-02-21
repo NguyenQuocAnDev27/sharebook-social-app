@@ -52,10 +52,10 @@ const newPosts = () => {
     const res = await getPostDetails(postId, user?.authInfo?.id || "");
     if (res.success) {
       const postDetail = res.data as PostViewer;
-      setPost(postDetail);
       bodyRef.current = postDetail.body;
-      setFile(postDetail.file);
       editorRef?.current?.setContentHTML(postDetail.body);
+      setPost(postDetail);
+      setFile(postDetail.file);
     } else {
       Alert.alert("Post", res.message);
       router.push("/home");

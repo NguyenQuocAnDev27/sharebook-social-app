@@ -96,7 +96,7 @@ const Profile = () => {
   };
 
   const handleLogout = () => {
-    Alert.alert("Trang cá nhân", "Bạn đang đăng xuất đúng chứ>", [
+    Alert.alert("Trang cá nhân", "Bạn đang đăng xuất đúng chứ?", [
       {
         text: "Không phải",
         onPress: () => {},
