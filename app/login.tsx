@@ -64,19 +64,19 @@ const login = () => {
 
         {/* Welcome Text */}
         <View>
-          <Text style={styles.welcomeText}>Hey,</Text>
-          <Text style={styles.welcomeText}>Welcome Back</Text>
+          <Text style={styles.welcomeText}>Chào Bạn,</Text>
+          <Text style={styles.welcomeText}>Đã Trở Lại 🤗</Text>
         </View>
 
         {/* form */}
         <View style={styles.form}>
           <Text style={{ fontSize: hp(1.5), color: theme.colors.text }}>
-            Please login to continue
+            Đăng nhập để tiếp tục
           </Text>
           {/* email field */}
           <Input
             icon={<Icon name="mail" size={26} strokeWidth={1.6} />}
-            placeholder="Enter your email"
+            placeholder="Email"
             onChangeText={(text) => (mailRef.current = text)}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -84,17 +84,17 @@ const login = () => {
           {/* password field */}
           <Input
             icon={<Icon name="lock" size={26} strokeWidth={1.6} />}
-            placeholder="Enter your password"
+            placeholder="Mật khẩu"
             onChangeText={(text) => (passwordRef.current = text)}
             secureTextEntry={true}
           />
           {/* forgot password */}
-          <Text style={styles.forgotPassword}>Forgot Password?</Text>
+          <Text style={styles.forgotPassword}>Quên Mật Khẩu?</Text>
           {/* button */}
-          <Button title="Login" loading={loading} onPress={onSubmit} />
+          <Button title="Đăng nhập" loading={loading} onPress={onSubmit} />
           {/* footer */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account?</Text>
+            <Text style={styles.footerText}>Chưa có tài khoản?</Text>
             <Pressable onPress={() => router.push("/signUp")}>
               <Text
                 style={[
@@ -105,7 +105,7 @@ const login = () => {
                   },
                 ]}
               >
-                Sign up
+                Đăng ký
               </Text>
             </Pressable>
           </View>

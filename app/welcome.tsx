@@ -6,7 +6,6 @@ import { hp, wp } from "@/helpers/common";
 import { theme } from "@/constants/theme";
 import Button from "@/components/Button";
 
-
 const welcome = () => {
   const router = useRouter();
 
@@ -22,18 +21,19 @@ const welcome = () => {
         <View style={{ gap: 20 }}>
           <Text style={styles.title}>ShareBook!</Text>
           <Text style={styles.punchLine}>
-            Where every thought finds a home and every image tells a story
+            Mỗi ý tưởng đều có chốn dừng chân, mỗi hình ảnh đều chứa đựng một
+            câu chuyện ✨✨✨
           </Text>
         </View>
 
         <View style={styles.footer}>
           <Button
-            title="Get Started"
+            title="Bắt đầu nào!"
             buttonStyle={{ marginHorizontal: wp(3) }}
             onPress={() => router.push("/signUp")}
           />
           <View style={styles.bottomTextContainer}>
-            <Text style={styles.loginText}>Already have an account?</Text>
+            <Text style={styles.loginText}>Đã có tài khoản?</Text>
             <Pressable onPress={() => router.push("/login")}>
               <Text
                 style={
@@ -44,7 +44,7 @@ const welcome = () => {
                   })
                 }
               >
-                Login
+                Đăng nhập
               </Text>
             </Pressable>
           </View>

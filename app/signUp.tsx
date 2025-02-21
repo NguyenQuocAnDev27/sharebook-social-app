@@ -66,25 +66,25 @@ const signUp = () => {
 
         {/* Welcome Text */}
         <View>
-          <Text style={styles.welcomeText}>Let's</Text>
-          <Text style={styles.welcomeText}>Get Started</Text>
+          <Text style={styles.welcomeText}>Hãy</Text>
+          <Text style={styles.welcomeText}>Bắt Đầu Nào!</Text>
         </View>
 
         {/* form */}
         <View style={styles.form}>
           <Text style={{ fontSize: hp(1.5), color: theme.colors.text }}>
-            Please fill the details to create an account
+            Vui lòng điền đầy đủ các thông tin
           </Text>
           {/* name field */}
           <Input
             icon={<Icon name="user" size={26} strokeWidth={1.6} />}
-            placeholder="Enter your name"
+            placeholder="Họ tên"
             onChangeText={(text) => (nameRef.current = text)}
           />
           {/* email field */}
           <Input
             icon={<Icon name="mail" size={26} strokeWidth={1.6} />}
-            placeholder="Enter your email"
+            placeholder="Email"
             onChangeText={(text) => (mailRef.current = text)}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -92,14 +92,14 @@ const signUp = () => {
           {/* password field */}
           <Input
             icon={<Icon name="lock" size={26} strokeWidth={1.6} />}
-            placeholder="Enter your password"
+            placeholder="Mật khẩu"
             onChangeText={(text) => (passwordRef.current = text)}
           />
           {/* button */}
-          <Button title="Sign Up" loading={loading} onPress={onSubmit} />
+          <Button title="Đăng ký" loading={loading} onPress={onSubmit} />
           {/* footer */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Already have an account!</Text>
+            <Text style={styles.footerText}>Đã có tài khoản!</Text>
             <Pressable onPress={() => router.push("/login")}>
               <Text
                 style={[
@@ -110,7 +110,7 @@ const signUp = () => {
                   },
                 ]}
               >
-                Login
+                Đăng nhập
               </Text>
             </Pressable>
           </View>
