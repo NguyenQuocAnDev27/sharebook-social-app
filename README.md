@@ -18,7 +18,7 @@ Follow the steps below to get started with the project:
 - This will show the QR code. You can scan it by your phone to run the app or run the app in an emulator then press command to choose ios or android, these commands will be showed in your terminal.
 
 ## 🎥 Video Demo
-- Link: 
+- Link: https://youtu.be/N_UfwVssfHA
 
 ## 📱 Features
 
