@@ -55,7 +55,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     const timeAnimation = 300;
     setTimeout(() => {
       setShowIconMenu(false);
-    }, 120);
+    }, 110);
     flexValue.value = withTiming(0, { duration: timeAnimation });
     padHozValue.value = withTiming(0, { duration: timeAnimation });
     padVerValue.value = withTiming(0, { duration: timeAnimation });

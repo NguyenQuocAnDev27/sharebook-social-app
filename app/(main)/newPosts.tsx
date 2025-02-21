@@ -20,6 +20,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Video, ResizeMode } from "expo-av";
@@ -45,6 +46,7 @@ const newPosts = () => {
   const [file, setFile] = useState<ImagePicker.ImagePickerAsset | string>();
   const params = useLocalSearchParams();
   const [post, setPost] = useState<PostViewer | null>(null);
+  const [isKeyboardShow, setIsKeyboardShow] = useState(false);
 
   const gettingPostDetails = async (postId: string) => {
     const res = await getPostDetails(postId, user?.authInfo?.id || "");
@@ -100,7 +102,7 @@ const newPosts = () => {
     }
 
     let data: Post = {
-      userId: user?.authInfo?.id || '',
+      userId: user?.authInfo?.id || "",
       body: bodyRef.current,
       file,
     };
@@ -118,7 +120,7 @@ const newPosts = () => {
       bodyRef.current = "";
       editorRef.current = null;
       if (post) {
-        router.push({pathname: '/postDetails', params: {postId: post.id}});
+        router.push({ pathname: "/postDetails", params: { postId: post.id } });
       } else {
         router.back();
       }
@@ -153,15 +155,23 @@ const newPosts = () => {
       const postId = params.postId;
       gettingPostDetails(postId as string);
     }
+
+    const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
+      setIsKeyboardShow(true);
+    });
+
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      setIsKeyboardShow(false);
+    });
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
   }, []);
 
   return (
-    <ScreenWarpper>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={32}
-      >
+    <ScreenWarpper autoDismissKeyboard={false}>
+      <View style={styles.container}>
         <Header title={post ? "Bài viết của bạn" : "Bài viết mới"} />
         <ScrollView
           contentContainerStyle={{ gap: 20 }}
@@ -221,7 +231,9 @@ const newPosts = () => {
 
           <View style={styles.media}>
             <Text style={styles.addImageText}>
-              {post ? "Cập nhật hình ảnh/video của bài viết" : "Thêm hình ảnh/video"}
+              {post
+                ? "Cập nhật hình ảnh/video của bài viết"
+                : "Thêm hình ảnh/video"}
             </Text>
             <View style={styles.mediaIcons}>
               <TouchableOpacity onPress={() => onPickFile(true)}>
@@ -232,16 +244,18 @@ const newPosts = () => {
               </TouchableOpacity>
             </View>
           </View>
-        </ScrollView>
 
-        <Button
-          buttonStyle={{ height: hp(6.2) }}
-          title={post ? "Cập nhật" : "Đăng"}
-          loading={loading}
-          hasShadow={false}
-          onPress={onSubmit}
-        />
-      </KeyboardAvoidingView>
+          <Button
+            buttonStyle={{ height: hp(6.2) }}
+            title={post ? "Cập nhật" : "Đăng"}
+            loading={loading}
+            hasShadow={false}
+            onPress={onSubmit}
+          />
+
+          {isKeyboardShow && <View style={{ height: hp(35) }}></View>}
+        </ScrollView>
+      </View>
     </ScreenWarpper>
   );
 };
