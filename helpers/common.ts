@@ -15,7 +15,7 @@ export const wp = (percentage: number) => {
 };
 
 export const getImageSource = (uri: string | undefined | null) => {
-  if(uri  === undefined || uri === null) {
+  if (uri === undefined || uri === null) {
     const defaultUserImage = require("../assets/images/defaultUser.png");
     return defaultUserImage;
   }
@@ -37,19 +37,28 @@ export const getFilePath = (folderName: string, isImage: boolean) => {
 };
 
 export const stripHtmlTags = (html: string): string => {
-  return html.replace(/<[^>]*>/gm, '');
+  return html.replace(/<[^>]*>/gm, "");
 };
 
 export const getFormattedDate = (date: string): string => {
   moment.locale("vi");
-  return moment(date).format("D MMMM")
-}
+  return moment(date).format("D MMMM");
+};
 
 export const maskGmail = (email: string): string => {
   if (!email.includes("@gmail.com")) return "";
 
   const username = email.replace("@gmail.com", "");
-  if (username.length <= 8) return email;
+
+  if(username.length < 6) return "";
+
+  if (username.length <= 8 && username.length >= 6) {
+    const firstPart = username.slice(0, 2);
+    const lastPart = username.slice(-2);
+    const middleMask = "*".repeat(username.length - 4);
+
+    return `${firstPart}${middleMask}${lastPart}@gmail.com`;
+  }
 
   const firstPart = username.slice(0, 4);
   const lastPart = username.slice(-4);
