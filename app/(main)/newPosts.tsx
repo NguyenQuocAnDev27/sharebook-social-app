@@ -99,35 +99,31 @@ const newPosts = () => {
       return;
     }
 
-    if (user?.userData?.id !== undefined) {
-      let data: Post = {
-        userId: user?.userData?.id,
-        body: bodyRef.current,
-        file,
-      };
+    let data: Post = {
+      userId: user?.authInfo?.id || '',
+      body: bodyRef.current,
+      file,
+    };
 
-      if (post && post.id) data.id = post.id;
+    if (post && post.id) data.id = post.id;
 
-      setLoading(true);
-      // 🔄️
-      let res = await createOrUpdatePost(data);
-      setLoading(false);
+    setLoading(true);
+    // 🔄️
+    let res = await createOrUpdatePost(data);
+    setLoading(false);
 
-      if (res.success) {
-        console.log(`Uploading Post Result -> ${res.data}`);
-        setFile(undefined);
-        bodyRef.current = "";
-        editorRef.current = null;
-        if (post) {
-          router.push("/home");
-        } else {
-          router.back();
-        }
+    if (res.success) {
+      console.log(`Uploading Post Result -> ${res.data}`);
+      setFile(undefined);
+      bodyRef.current = "";
+      editorRef.current = null;
+      if (post) {
+        router.push({pathname: '/postDetails', params: {postId: post.id}});
       } else {
-        Alert.alert("Post", res.message);
+        router.back();
       }
     } else {
-      Alert.alert("Post", "User is not authenticated!");
+      Alert.alert("Post", res.message);
     }
   };
 

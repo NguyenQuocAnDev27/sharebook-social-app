@@ -71,12 +71,16 @@ const home = () => {
       let newPost: PostViewer = { ...payload.new };
       let res = await getUserData(newPost.userId);
       newPost.user = res.success ? res.data : {};
+      newPost.comments = [];
+      newPost.postLikes = [];
+      newPost.isLikeOwner = false;
+      // console.log(`New post ${JSON.stringify(newPost)}`);
       setPosts((prevPosts) => [newPost, ...prevPosts]);
     }
   };
 
   const handleNotifcationEvent = async (payload: any) => {
-    console.log(`Got new notification ${JSON.stringify(payload)}`);
+    // console.log(`Got new notification ${JSON.stringify(payload)}`);
     if (payload?.eventType == "INSERT" && payload?.new?.id) {
       setNotiCount((prev) => prev + 1);
     } else if (payload?.eventType == "UPDATE" && payload?.new?.seen) {

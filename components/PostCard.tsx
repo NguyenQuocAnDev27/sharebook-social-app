@@ -96,8 +96,8 @@ const PostCard: React.FC<PostCardProps> = ({
   };
 
   useEffect(() => {
-    setLikes(item?.postLikes);
-    setComments(item?.comments);
+    setLikes(item?.postLikes || []);
+    setComments(item?.comments || []);
   }, []);
 
   const openPostDetails = () => {};
@@ -111,8 +111,13 @@ const PostCard: React.FC<PostCardProps> = ({
   // }
 
   const onLike = async () => {
-    if (currentUser?.userData?.id == null) {
+    if (currentUser?.userData?.id == null || currentUser?.userData?.id === undefined) {
       Alert.alert(`User is not authenticated`);
+      return;
+    }
+
+    if(item?.id === null || item?.id === undefined) {
+      Alert.alert(`Post is not valid`);
       return;
     }
 
@@ -125,13 +130,13 @@ const PostCard: React.FC<PostCardProps> = ({
 
     let res = await createPostLike(data);
 
-    setLikes((prev) => [
-      ...prev,
-      { id: res?.data?.id, userId: res?.data?.userId },
-    ]);
-
-    if (!res.success) {
-      Alert.alert("Post", "Something went wrong");
+    if(res.success) {
+      setLikes((prev) => [
+        ...prev,
+        { id: res?.data?.id, userId: res?.data?.userId },
+      ]);
+    } else {
+      Alert.alert("Post", res.message);
     }
   };
 

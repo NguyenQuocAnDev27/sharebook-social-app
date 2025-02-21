@@ -61,7 +61,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           color: theme.colors.text,
           placeholderColor: "gray",
         }}
-        placeholder={"What's about this book?"}
+        placeholder={"Write your thoughts here..."}
         onChange={onChange}
       />
     </View>
