@@ -31,15 +31,18 @@ interface NotificationItemProps {
 const NotificationItem: React.FC<NotificationItemProps> = ({
   notification,
   router,
-  onDeleteNotification
+  onDeleteNotification,
 }) => {
   const { postId, commentId } = JSON.parse(notification.data);
   const [openMenu, setOpenMenu] = React.useState(false);
   const [isSeen, setIsSeen] = React.useState(notification.seen);
+  const [showIconMenu, setShowIconMenu] = React.useState(false);
 
   const onOpenPostDetail = async () => {
     router.push({ pathname: "/postDetails", params: { postId, commentId } });
-    await updateStatusNotification(notification);
+    if (!notification.seen) {
+      await updateStatusNotification(notification);
+    }
   };
 
   const onSeenNotification = async () => {
@@ -49,20 +52,52 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   };
 
   const closeMenu = () => {
-    flexValue.value = withTiming(0, { duration: 200 });
-    setTimeout(() => setOpenMenu(false), 130);
+    const timeAnimation = 300;
+    setTimeout(() => {
+      setShowIconMenu(false);
+    }, 120);
+    flexValue.value = withTiming(0, { duration: timeAnimation });
+    padHozValue.value = withTiming(0, { duration: timeAnimation });
+    padVerValue.value = withTiming(0, { duration: timeAnimation });
+    gapValue.value = withTiming(0, { duration: timeAnimation });
+    heightValue.value = withTiming(0, { duration: timeAnimation });
+    setTimeout(() => setOpenMenu(false), timeAnimation - 30);
+  };
+
+  const onOpenMenu = () => {
+    setOpenMenu(true);
+    setShowIconMenu(true);
   };
 
   const flexValue = useSharedValue(0);
+  const padHozValue = useSharedValue(0);
+  const padVerValue = useSharedValue(0);
+  const gapValue = useSharedValue(0);
+  const heightValue = useSharedValue(75);
 
-  const animatedStyle = useAnimatedStyle(() => {
+  const animatedConatinerStyle = useAnimatedStyle(() => {
     return {
       flex: flexValue.value,
+      paddingVertical: padVerValue.value,
+      paddingHorizontal: padHozValue.value,
+      gap: gapValue.value,
+      height: `${heightValue.value}%`,
     };
   });
 
   useEffect(() => {
-    flexValue.value = withTiming(openMenu ? 1 : 0, { duration: 200 }); // 200ms animation
+    const timeAnimation = 200; // 200ms animation
+    flexValue.value = withTiming(openMenu ? 1 : 0, { duration: timeAnimation });
+    padHozValue.value = withTiming(openMenu ? 15 : 0, {
+      duration: timeAnimation,
+    });
+    padVerValue.value = withTiming(openMenu ? 10 : 0, {
+      duration: timeAnimation,
+    });
+    gapValue.value = withTiming(openMenu ? 12 : 0, { duration: timeAnimation });
+    heightValue.value = withTiming(openMenu ? 100 : 75, {
+      duration: timeAnimation,
+    });
   }, [openMenu]);
 
   return (
@@ -94,7 +129,9 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             { color: theme.colors.textDark, fontWeight: theme.fonts.bold },
           ]}
         >
-          {notification.title === 'commented on your post' ? 'đã bình luận về bài viết của bạn' : 'unknown action'}
+          {notification.title === "commented on your post"
+            ? "đã bình luận về bài viết của bạn"
+            : "unknown action"}
         </Text>
       </View>
       <View style={styles.moreIconContainer}>
@@ -103,43 +140,57 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             style={[
               {
                 flexDirection: "row",
-                gap: 10,
-                backgroundColor: "white",
+                backgroundColor: isSeen ? "white" : theme.colors.lightGray2,
                 alignItems: "center",
+                justifyContent: "space-evenly",
                 borderRadius: theme.radius.xxl,
                 borderCurve: "continuous",
-                padding: 5,
+                position: "absolute",
+                right: 0,
               },
-              animatedStyle,
+              animatedConatinerStyle,
             ]}
           >
             {!isSeen && (
               <Pressable onPress={onSeenNotification}>
-                <Icon name="eyeOff" color={theme.colors.dark} strokeWidth={2} />
+                {showIconMenu ? (
+                  <Icon
+                    name="eyeOff"
+                    color={theme.colors.dark}
+                    strokeWidth={2}
+                  />
+                ) : (
+                  <View style={{ width: 20, height: 20 }}></View>
+                )}
               </Pressable>
             )}
             <Pressable onPress={() => onDeleteNotification(notification.id)}>
-              <Icon
-                name="delete"
-                color={theme.colors.roseLight}
-                strokeWidth={2}
-              />
+              {showIconMenu ? (
+                <Icon
+                  name="delete"
+                  color={theme.colors.roseLight}
+                  strokeWidth={2}
+                />
+              ) : (
+                <View style={{ width: 20, height: 20 }}></View>
+              )}
             </Pressable>
-            <Pressable onPress={closeMenu}>
-              <Icon name="cancel" color={theme.colors.dark} strokeWidth={2} />
-            </Pressable>
+            <TouchableOpacity onPress={closeMenu}>
+              {showIconMenu ? (
+                <Icon name="cancel" color={theme.colors.dark} strokeWidth={2} />
+              ) : (
+                <View style={{ width: 20, height: 20 }}></View>
+              )}
+            </TouchableOpacity>
           </Animated.View>
         ) : (
-          <Pressable
-            onPress={() => setOpenMenu(true)}
-            style={{ marginRight: 5 }}
-          >
+          <TouchableOpacity onPress={onOpenMenu} style={{ marginRight: 5 }}>
             <Icon
               name="threeDotsHorizontal"
               color={theme.colors.dark}
               strokeWidth={4}
             />
-          </Pressable>
+          </TouchableOpacity>
         )}
       </View>
     </TouchableOpacity>

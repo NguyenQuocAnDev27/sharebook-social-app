@@ -123,7 +123,7 @@ const EditProfile = () => {
       // ✅ Success work to-do
       setUserData(newUserData.data);
       setUser(newUserData.data);
-      router.push("/profile");
+      router.back();
     } else {
       // ❌ Error work to-do
       Alert.alert("Profile", "Error while updating user");
@@ -131,7 +131,10 @@ const EditProfile = () => {
         `Edit Profile - Error while updating user | ${newUserData.message}`
       );
     }
-    setLoading(false);
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 300);
   };
 
   const onPickImage = async () => {

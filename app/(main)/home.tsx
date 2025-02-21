@@ -185,7 +185,7 @@ const home = () => {
           contentContainerStyle={styles.listStyle}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <PostCard item={item} currentUser={user} router={router} />
+            <PostCard item={item} currentUser={user?.userData} router={router} />
           )}
           ListFooterComponent={
             !hasMore ? (
@@ -260,6 +260,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 20,
     backgroundColor: theme.colors.roseLight,
+    borderColor: theme.colors.gray,
+    borderWidth: 1,
   },
   pillText: {
     color: "white",

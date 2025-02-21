@@ -170,7 +170,7 @@ const postDetails = () => {
           {post && (
             <PostCard
               item={post}
-              currentUser={user}
+              currentUser={user?.userData}
               router={router}
               hasShadow={false}
               disableMoreIcon={true}

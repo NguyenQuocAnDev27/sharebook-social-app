@@ -103,6 +103,7 @@ const Icon: React.FC<IconProps> = ({
       {...props}
     />
   );
+  
 };
 
 export default Icon;

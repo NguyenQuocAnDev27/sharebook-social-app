@@ -16,7 +16,7 @@ import {
   removePost,
   removePostLike,
 } from "@/services/postService";
-import { User } from "@/contexts/AuthContext";
+import { SupaUser, User } from "@/contexts/AuthContext";
 import {
   getFormattedDate,
   getSupabaseFileUrl,
@@ -36,7 +36,7 @@ import Loading from "./Loading";
 
 interface PostCardProps {
   item: PostViewer;
-  currentUser: User | null;
+  currentUser: SupaUser | undefined;
   router: Router;
   hasShadow?: boolean;
   disableMoreIcon?: boolean;
@@ -65,7 +65,7 @@ const PostCard: React.FC<PostCardProps> = ({
     item.isLikeOwner || false
   );
 
-  const isPostOwner = item.userId === currentUser?.userData?.id;
+  const isPostOwner = item.userId === currentUser?.id;
   const [openMoreFunctions, setOpenMoreFunctions] = useState<boolean>(false);
 
   const [likes, setLikes] = useState<any[]>([]);
@@ -123,8 +123,8 @@ const PostCard: React.FC<PostCardProps> = ({
 
   const onLike = async () => {
     if (
-      currentUser?.userData?.id == null ||
-      currentUser?.userData?.id === undefined
+      currentUser?.id == null ||
+      currentUser?.id === undefined
     ) {
       Alert.alert(`User is not authenticated`);
       return;
@@ -138,7 +138,7 @@ const PostCard: React.FC<PostCardProps> = ({
     setIsLikeOwner(true);
 
     let data: PostLikeBody = {
-      userId: currentUser?.userData?.id,
+      userId: currentUser?.id,
       postId: item?.id,
     };
 
@@ -155,16 +155,16 @@ const PostCard: React.FC<PostCardProps> = ({
   };
 
   const onRemoveLike = async () => {
-    if (currentUser?.userData?.id == null) {
+    if (currentUser?.id == null) {
       Alert.alert(`User is not authenticated`);
       return;
     }
 
     setIsLikeOwner(false);
-    setLikes(likes.filter((like) => like?.userId != currentUser?.userData?.id));
+    setLikes(likes.filter((like) => like?.userId != currentUser?.id));
 
     let data: PostLikeBody = {
-      userId: currentUser?.userData?.id,
+      userId: currentUser?.id,
       postId: item?.id,
     };
 
@@ -224,6 +224,10 @@ const PostCard: React.FC<PostCardProps> = ({
     setLoadingDeletingPost(false);
   };
 
+  const openProfile = async () => {
+    router.push({pathname: '/profile', params: {userId: item.userId}})
+  };
+
   const onDeletePost = async () => {
     Alert.alert("Bài viết", "Bài viết này sẽ bị xóa vĩnh viễn!", [
       {
@@ -246,13 +250,17 @@ const PostCard: React.FC<PostCardProps> = ({
       <View style={styles.header}>
         {/* user info */}
         <View style={styles.userInfo}>
-          <Avatar
-            size={hp(4.5)}
-            uri={item?.user?.image}
-            rounded={theme.radius.md}
-          />
+          <TouchableOpacity onPress={openProfile} disabled={isPostOwner}>
+            <Avatar
+              size={hp(4.5)}
+              uri={item?.user?.image}
+              rounded={theme.radius.md}
+            />
+          </TouchableOpacity>
           <View style={{ gap: 2 }}>
-            <Text style={styles.username}>{item?.user?.name}</Text>
+            <TouchableOpacity onPress={openProfile} disabled={isPostOwner}>
+              <Text style={styles.username}>{item?.user?.name}</Text>
+            </TouchableOpacity>
             <Text style={styles.postTime}>
               {getFormattedDate(item?.created_at)}
             </Text>

@@ -5,11 +5,12 @@ import Loading from "@/components/Loading";
 import PostCard from "@/components/PostCard";
 import ScreenWarpper from "@/components/ScreenWrapper";
 import { theme } from "@/constants/theme";
-import { useAuth, User } from "@/contexts/AuthContext";
+import { SupaUser, useAuth, User } from "@/contexts/AuthContext";
 import { hp, maskGmail, maskPhoneNumber, wp } from "@/helpers/common";
 import { supabase } from "@/lib/supabase";
 import { getPosts, getYourPosts, PostViewer } from "@/services/postService";
-import { Router, useRouter } from "expo-router";
+import { getUserData } from "@/services/userService";
+import { Router, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -30,22 +31,45 @@ const Profile = () => {
     console.warn("AuthContext is not found");
     return null;
   }
-  const { user, setAuth } = AuthContext;
+  const { user: currentUser, setAuth } = AuthContext;
   const [posts, setPosts] = useState<PostViewer[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [isShowOtherUser, setIsShowOtherUser] = useState<boolean>(false);
+  const [otherUserId, setOtherUserId] = useState<string | null>(null);
+  const [user, setUser] = useState<SupaUser | undefined>(currentUser?.userData);
+  const params = useLocalSearchParams();
+
+  const gettingUserData = async (userId: string) => {
+    let res = await getUserData(userId);
+    if (res.success) {
+      setUser(res.data);
+    } else {
+      Alert.alert("Trang cá nhân", "Không tìm thấy người dùng");
+      router.push("/home");
+      return null;
+    }
+  };
 
   useEffect(() => {
     page = 0;
-    gettingPosts();
+    if (Object.keys(params).length > 1) {
+      const userId = params.userId;
+      setOtherUserId(`${userId}`);
+      setIsShowOtherUser(true);
+      gettingUserData(`${userId}`);
+      gettingPosts(`${userId}`);
+    } else {
+      gettingPosts(`${currentUser?.userData?.id}`);
+    }
   }, []);
 
-  const gettingPosts = async () => {
+  const gettingPosts = async (userId: string) => {
     if (!hasMore) return;
 
     page += 1;
     // 🔄️ get posts
-    let res = await getYourPosts(page, user?.authInfo?.id || "");
+    let res = await getYourPosts(page, userId || "");
 
     if (res.success) {
       console.log(`Profile Screen - ${res.message}`);
@@ -119,6 +143,8 @@ const Profile = () => {
             user={user}
             router={router}
             handleLogoutBtn={handleLogout}
+            disableEdit={otherUserId !== null}
+            disableLogout={otherUserId !== null}
           />
         }
         showsVerticalScrollIndicator={false}
@@ -144,7 +170,7 @@ const Profile = () => {
         }
         onEndReachedThreshold={0}
         onEndReached={() => {
-          gettingPosts();
+          gettingPosts(`${user?.id}`);
         }}
       />
     </ScreenWarpper>
@@ -155,60 +181,68 @@ const UserHeader = ({
   user,
   router,
   handleLogoutBtn,
+  disableEdit = false,
+  disableLogout = false,
 }: {
-  user: User | null;
+  user: SupaUser | undefined;
   router: Router;
   handleLogoutBtn: () => void;
+  disableEdit?: boolean;
+  disableLogout?: boolean;
 }) => {
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <View style={styles.headerContainer}>
         <Header title="Trang cá nhân" marginBottom={30} />
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogoutBtn}>
-          <Icon name="logout" color={theme.colors.rose} strokeWidth={2} />
-        </TouchableOpacity>
+        {!disableLogout && (
+          <TouchableOpacity style={styles.logoutBtn} onPress={handleLogoutBtn}>
+            <Icon name="logout" color={theme.colors.rose} strokeWidth={2} />
+          </TouchableOpacity>
+        )}
       </View>
       <View style={styles.container}>
         <View style={{ gap: 15 }}>
           <View style={styles.avatarContainer}>
             <Avatar
-              uri={user?.userData?.image}
+              uri={user?.image}
               size={hp(12)}
               rounded={theme.radius.xxl * 1.4}
             />
-            <Pressable
-              style={styles.editIcon}
-              onPress={() => router.push("/editProfile")}
-            >
-              <Icon name="edit" strokeWidth={2.5} size={20} />
-            </Pressable>
+            {!disableEdit && (
+              <Pressable
+                style={styles.editIcon}
+                onPress={() => router.push("/editProfile")}
+              >
+                <Icon name="edit" strokeWidth={2.5} size={20} />
+              </Pressable>
+            )}
           </View>
 
           <View style={{ alignItems: "center", gap: 4 }}>
             <Text style={styles.userName}>
-              {user?.userData?.name || "Chưa cập nhật tên"}
+              {user?.name || "Chưa cập nhật tên"}
             </Text>
-            <Text>{user?.userData?.address || ""}</Text>
+            <Text>{user?.address || ""}</Text>
           </View>
 
           <View style={{ gap: 10 }}>
             <View style={styles.info}>
               <Icon name="mail" size={20} color={theme.colors.textLight} />
               <Text style={styles.infoText}>
-                {maskGmail(user?.authInfo?.email || "")}
+                {maskGmail(user?.email || "")}
               </Text>
             </View>
-            {user?.userData?.phoneNumber && (
+            {user?.phoneNumber && (
               <View style={styles.info}>
                 <Icon name="call" size={20} color={theme.colors.textLight} />
                 <Text style={styles.infoText}>
-                  {maskPhoneNumber(user?.userData?.phoneNumber)}
+                  {maskPhoneNumber(user?.phoneNumber)}
                 </Text>
               </View>
             )}
-            {user?.userData?.bio && (
+            {user?.bio && (
               <View style={styles.info}>
-                <Text style={styles.infoText}>{user?.userData?.bio}</Text>
+                <Text style={styles.infoText}>{user?.bio}</Text>
               </View>
             )}
           </View>
