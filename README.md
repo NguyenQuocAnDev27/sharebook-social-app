@@ -26,6 +26,7 @@ Follow the steps below to get started with the project:
 - Posts: Share content, videos, images with your friends.
 - Likes, Comments, Download & Share: Engage with your friends' posts.
 - Real-time Updates: Stay up to date with the latest posts, comments, and notifications.
+- Whenever someone comments on your post, you will instantly receive a notification on your device, ensuring you never miss any interactions.
 
 ## 🛠️ Technologies Used
 - React Native
