@@ -36,3 +36,10 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# Ignore Firebase config
+android/app/google-services.json
+ios/GoogleService-Info.plist
+
+# Ignore Keystore file (Android signing key)
+android/app/my-upload-key.keystore

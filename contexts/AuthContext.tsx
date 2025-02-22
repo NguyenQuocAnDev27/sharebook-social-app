@@ -12,6 +12,7 @@ export interface SupaUser {
   address?: string | null;
   phoneNumber?: string;
   createdAt?: string;
+  expoPushToken? : string | null;
 }
 
 export interface User {
