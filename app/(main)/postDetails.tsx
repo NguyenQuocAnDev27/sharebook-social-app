@@ -32,6 +32,7 @@ import CommentItem from "@/components/CommentItem";
 import {
   createNotification,
   NotificationBody,
+  pushNotification,
 } from "@/services/notificationService";
 
 const postDetails = () => {
@@ -111,6 +112,7 @@ const postDetails = () => {
     let res = await createCommentPost(data);
 
     if (res.success) {
+      await pushNotification(post.user.expoPushToken, post.user.name, "đã bình luận về bài viết của bạn");
       inputRef.current?.clear();
       commentRef.current = "";
 
@@ -129,11 +131,13 @@ const postDetails = () => {
         };
       });
 
+      const user_action = "đã bình luận về bài viết của bạn"
+
       if (post.userId !== user?.authInfo?.id) {
         let prepareData: NotificationBody = {
           senderId: user?.authInfo?.id || "",
           receiverId: post?.user.id || "",
-          title: "commented on your post",
+          title: user_action,
           data: JSON.stringify({ postId: post?.id, commentId: res.data.id }),
         };
         await createNotification(prepareData);

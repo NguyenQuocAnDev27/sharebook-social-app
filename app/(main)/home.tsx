@@ -19,7 +19,7 @@ import PostCard from "@/components/PostCard";
 import Loading from "@/components/Loading";
 import { supabase } from "@/lib/supabase";
 import { getUserData } from "@/services/userService";
-import { getNotifications } from "@/services/notificationService";
+import { getNotifications, usePushNotifications } from "@/services/notificationService";
 
 var page = 0;
 const home = () => {

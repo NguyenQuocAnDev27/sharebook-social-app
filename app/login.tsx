@@ -17,13 +17,14 @@ import { hp, wp } from "@/helpers/common";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
 import { supabase } from "@/lib/supabase";
+import { usePushNotifications } from "@/services/notificationService";
+import { updateUser } from "@/services/userService";
 
 const login = () => {
   const router = useRouter();
   const mailRef = useRef("");
   const passwordRef = useRef("");
   const [loading, setLoading] = useState(false);
-
   const onSubmit = async () => {
     if (!mailRef.current || !passwordRef.current) {
       Alert.alert("Login", "Please fill all the fields");

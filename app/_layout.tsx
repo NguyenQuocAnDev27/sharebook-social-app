@@ -1,6 +1,7 @@
 import { AuthProvider, SupaUser, useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
-import { getUserData } from "@/services/userService";
+import { usePushNotifications } from "@/services/notificationService";
+import { getUserData, updateUser } from "@/services/userService";
 import { User as SessionUser } from "@supabase/supabase-js";
 import { Stack, useRouter } from "expo-router";
 import React, { useEffect } from "react";
@@ -17,6 +18,7 @@ const _layout = () => {
 const MainLayout = () => {
   const authContext = useAuth();
   const router = useRouter();
+  const { expoPushToken, notification } = usePushNotifications();
 
   AppState.addEventListener("change", (state) => {
     if (state === "active") {
@@ -31,7 +33,18 @@ const MainLayout = () => {
     return null;
   }
 
-  const { setAuth, setUserData } = authContext;
+  const { user, setAuth, setUserData } = authContext;
+  
+  useEffect(() => {
+    console.log('run')
+    if(expoPushToken?.data !== undefined && user?.userData !== null && user !== null) {
+      console.log(`${JSON.stringify(user.userData)}`)
+      updateUser({
+        ...user.userData,
+        expoPushToken: expoPushToken.data
+      });
+    }
+  }, [expoPushToken])
 
   useEffect(() => {
     supabase.auth.onAuthStateChange((_event, session) => {

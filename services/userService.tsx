@@ -54,6 +54,7 @@ export const updateUser = async (user: SupaUser): Promise<APIResponse> => {
         bio: user.bio,
         address: user.address,
         phoneNumber: user.phoneNumber,
+        expoPushToken: user.expoPushToken
       })
       .eq("id", user.id);
 

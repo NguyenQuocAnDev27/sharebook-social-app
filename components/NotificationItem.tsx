@@ -129,9 +129,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
             { color: theme.colors.textDark, fontWeight: theme.fonts.bold },
           ]}
         >
-          {notification.title === "commented on your post"
-            ? "đã bình luận về bài viết của bạn"
-            : "unknown action"}
+          {notification.title}
         </Text>
       </View>
       <View style={styles.moreIconContainer}>

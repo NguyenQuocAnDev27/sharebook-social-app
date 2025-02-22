@@ -7,6 +7,7 @@ import { Alert, Platform } from "react-native";
 import { PermissionStatus } from "expo-modules-core";
 import Constants from "expo-constants";
 import { theme } from "@/constants/theme";
+import { expo_token, supabasePushNotificationsUrl } from "@/constants";
 
 const SERVICE_NAME = "Notification Service";
 
@@ -311,14 +312,65 @@ export const usePushNotifications = (): PushNotifcationState => {
       Notifications.removeNotificationSubscription(
         notificationListener.current!
       );
-      Notifications.removeNotificationSubscription(
-        responseListener.current!
-      );
+      Notifications.removeNotificationSubscription(responseListener.current!);
     };
   }, []);
 
   return {
     expoPushToken,
-    notification
+    notification,
+  };
+};
+
+export const pushNotification = async (
+  expo_push_token: string,
+  userName: string,
+  message: string
+): Promise<APIResponse> => {
+  const taskName = "pushing notifications";
+  console.log(`${expo_push_token} | ${message}`);
+  try {
+    // 🔄️ Getting notifications
+    const error = 0;
+    const res = await fetch(supabasePushNotificationsUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        to: expo_push_token,
+        sound: "default",
+        title: "ShareBook",
+        body: `${userName} ${message}`,
+      }),
+    }).then((res) => res.json());
+
+    console.log(JSON.stringify(res));
+
+    if (error) {
+      // ❌ Error
+      console.warn(`${SERVICE_NAME} - Error while ${taskName}| ${res.message}`);
+      return {
+        success: false,
+        message: `Error while ${taskName}`,
+        data: null,
+      };
+    }
+
+    // ✅ Success
+    console.log(`${SERVICE_NAME} - ${taskName} sucessfully`);
+    return {
+      success: true,
+      message: `${taskName} successfully`,
+      data: null,
+    };
+  } catch (error) {
+    // ❌ Error
+    console.warn(`${SERVICE_NAME} - Error while ${taskName} | ${error}`);
+    return {
+      success: false,
+      message: `Error while ${taskName}`,
+      data: null,
+    };
   }
 };

@@ -17,6 +17,7 @@ export interface PostViewer {
     id: string;
     name: string;
     image: string;
+    expoPushToken: string;
   };
   postLikes: {
     id: string;
@@ -163,7 +164,7 @@ export const getYourPosts = async (
     const { data, error } = await supabase
       .from("posts")
       .select(
-        `*, user: users(id, name, image), postLikes(id, userId), comments (*, user: users(id, name, image))`
+        `*, user: users(id, name, image), postLikes(id, userId), comments (*, user: users(id, name, image, expoPushToken))`
       )
       .eq("userId", userId)
       .order("created_at", { ascending: false })
@@ -350,7 +351,7 @@ export const getPostDetails = async (
     const { data, error } = await supabase
       .from("posts")
       .select(
-        `*, user: users (id, name, image), postLikes (*), comments (*, user: users(id, name, image))`
+        `*, user: users (id, name, image, expoPushToken), postLikes (*), comments (*, user: users(id, name, image))`
       )
       .eq("id", postId)
       .order("created_at", { ascending: false, foreignTable: "comments" })
