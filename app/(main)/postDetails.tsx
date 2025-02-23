@@ -112,7 +112,6 @@ const postDetails = () => {
     let res = await createCommentPost(data);
 
     if (res.success) {
-      await pushNotification(post.user.expoPushToken, post.user.name, "đã bình luận về bài viết của bạn");
       inputRef.current?.clear();
       commentRef.current = "";
 
@@ -141,6 +140,7 @@ const postDetails = () => {
           data: JSON.stringify({ postId: post?.id, commentId: res.data.id }),
         };
         await createNotification(prepareData);
+        await pushNotification(post.user.expoPushToken, post.user.name, user_action);
       }
     } else {
       Alert.alert("Comment", res.message);
