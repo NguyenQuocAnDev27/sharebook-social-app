@@ -20,6 +20,10 @@ Follow the steps below to get started with the project:
 ## 🎥 Video Demo
 - Link: [https://youtu.be/N_UfwVssfHA](https://youtu.be/EaWsxRtW878)
 
+## 🏞️ UI/UX Prototype
+
+![UI ShareBooking](https://github.com/user-attachments/assets/bf13c0fd-f60b-4d6e-a0fa-72a8ab20589a)
+
 ## 📱 Features
 
 - User Profiles: Create and manage your profile.
