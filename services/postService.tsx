@@ -354,7 +354,6 @@ export const getPostDetails = async (
         `*, user: users (id, name, image, expoPushToken), postLikes (*), comments (*, user: users(id, name, image))`
       )
       .eq("id", postId)
-      .order("created_at", { ascending: false, foreignTable: "comments" })
       .single();
 
     if (error) {
